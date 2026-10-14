@@ -54,7 +54,12 @@ Three fields get linear partial credit: title length, description length and pho
 ## 6. Price benchmark rules
 
 - Compute `rent_per_sqm = monthly_rent / size_sqm`.
-- Benchmark against the **median** rent per sqm of comparable listings, where comparable means same building with 3 or more listings, else same area. In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
+- Benchmark against the **median** rent per sqm of comparable listings. Compare like with like: the first of these with 3 or more listings wins, and the app shows which one was used.
+  1. Same building, same bedroom count.
+  2. Same area, same bedroom count.
+  3. The whole area, whatever the count.
+- In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
+- Known weakness, measured on the sample data (see BUILD_LOG, 14 Oct 2026): slicing by bedrooms with a minimum of 3 makes the comparable groups small and the medians noisy, and it does not account for building tier. On the sample it flags more correctly priced listings than the building-only rule did. The minimum sample size and a tier adjustment are open questions for after step 3.
 - Report the percentage difference. Bands: within 10% is "about right", 10 to 25% is "above/below market", more than 25% is "well above/below market, check for a typo".
 - Always show the sample size the benchmark is based on. A benchmark from 4 listings looks different from one from 40.
 - Show the area's typical 1-bed rent next to it as a sanity line.
