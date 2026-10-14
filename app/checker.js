@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { reducer as autosaveReducer, initialState as autosaveInitial, isEmptyDraft, relativeTime } from "../lib/drafts/autosave.js";
+import { readDraft, writeDraft, removeDraft } from "../lib/drafts/storage.js";
 import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
@@ -52,7 +54,10 @@ export default function Checker({ reference }) {
   // Bumped whenever the whole draft is replaced (Clear, example buttons). The rewrite panel
   // is keyed on it, so it remounts with no rewrite, no edits and nothing accepted.
   const [session, setSession] = useState(0);
-  const loadDraft = (d) => { setDraft(d); setSession((s) => s + 1); };
+  const autosave = useAutosave(draft);
+  // Clear and the example buttons replace the whole draft and forget the saved one.
+  const loadDraft = (d) => { autosave.forget(); setDraft(d); setSession((s) => s + 1); };
+  const restoreDraft = () => { const d = autosave.restore(); if (d) { setDraft({ ...EMPTY, ...d }); setSession((s) => s + 1); } };
   const result = useMemo(() => scoreListing(draft, reference), [draft, reference]);
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
@@ -87,6 +92,18 @@ export default function Checker({ reference }) {
             <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}>Load a mispriced draft</button>
             <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
           </div>
+
+          {autosave.offer ? (
+            <div className="restore-bar" role="status">
+              <span>You have an unfinished draft from {relativeTime(autosave.offer.savedAt, autosave.now)}.</span>
+              <span className="form-actions">
+                <button type="button" onClick={restoreDraft}>Restore</button>
+                <button type="button" className="quiet" onClick={autosave.discard}>Discard</button>
+              </span>
+            </div>
+          ) : autosave.savedAt ? (
+            <p className="saved-line" aria-live="polite">Draft saved · {relativeTime(autosave.savedAt, autosave.now)}</p>
+          ) : null}
 
           <fieldset>
             <legend>The listing</legend>
@@ -316,6 +333,47 @@ function Benchmark({ bench, draft, result, reference }) {
       </dl>
     </div>
   );
+}
+
+// Saves the form to localStorage 800 ms after it stops changing, offers a saved draft back when
+// the page loads empty, and keeps a clock for the "Draft saved · 2 minutes ago" line.
+const SAVE_DEBOUNCE_MS = 800;
+
+function useAutosave(draft) {
+  const [state, dispatch] = useReducer(autosaveReducer, autosaveInitial);
+  const [now, setNow] = useState(() => Date.now());
+  const skipNext = useRef(false);
+
+  useEffect(() => {
+    dispatch({ type: "init", stored: readDraft(), formEmpty: isEmptyDraft(draft) });
+    const tick = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(tick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isEmptyDraft(draft)) return;
+    if (skipNext.current) { skipNext.current = false; return; }
+    const t = setTimeout(() => {
+      const at = Date.now();
+      if (writeDraft(draft, at)) { dispatch({ type: "saved", at }); setNow(at); }
+    }, SAVE_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [draft]);
+
+  return {
+    offer: state.offer ? state.offered : null,
+    savedAt: state.savedAt,
+    now,
+    restore() {
+      const d = state.offered?.draft ?? null;
+      skipNext.current = true; // the restored draft is already in storage; do not rewrite it as "just now"
+      dispatch({ type: "restore" });
+      return d;
+    },
+    discard() { removeDraft(); dispatch({ type: "discard" }); },
+    forget() { removeDraft(); dispatch({ type: "cleared" }); },
+  };
 }
 
 // Calls benchmark_listing when there is enough to compare, debounced, ignoring stale responses.
