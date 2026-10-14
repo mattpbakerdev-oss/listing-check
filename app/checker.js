@@ -85,11 +85,11 @@ export default function Checker({ reference }) {
             <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
           </div>
 
-          <Field f={byField.title} gain={gains.title} htmlFor="title">
+          <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
             <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
           </Field>
 
-          <Field f={byField.description} gain={gains.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
+          <Field f={byField.description} gain={gains.fields.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
             <textarea id="description" rows={5} value={draft.description} onChange={set("description")} />
           </Field>
 
@@ -107,44 +107,44 @@ export default function Checker({ reference }) {
           ) : null}
 
           <div className="row">
-            <Field f={byField.building} gain={gains.building} htmlFor="building">
+            <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
               <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
             </Field>
-            <Field f={byField.area} gain={gains.area} htmlFor="area">
+            <Field f={byField.area} gain={gains.fields.area} htmlFor="area">
               <input id="area" list="areas" value={draft.area} onChange={set("area")} autoComplete="off" />
             </Field>
           </div>
 
           <div className="row three">
-            <Field f={byField.size_sqm} gain={gains.size_sqm} htmlFor="size_sqm">
+            <Field f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
               <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
             </Field>
-            <Field f={byField.floor} gain={gains.floor} htmlFor="floor">
+            <Field f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
               <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
             </Field>
-            <Field f={byField.monthly_rent_thb} gain={gains.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
+            <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
               <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
             </Field>
           </div>
 
           <div className="row three">
-            <Field f={byField.bedrooms} gain={gains.bedrooms} htmlFor="bedrooms">
+            <Field f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
               <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
                 <option value="">Choose</option>
                 <option value="0">Studio</option>
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </Field>
-            <Field f={byField.bathrooms} gain={gains.bathrooms} htmlFor="bathrooms">
+            <Field f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
               <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
             </Field>
-            <Field f={byField.photo_count} gain={gains.photo_count} htmlFor="photo_count">
+            <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count">
               <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
             </Field>
           </div>
 
           <div className="row">
-            <Field f={byField.furnishing} gain={gains.furnishing} htmlFor="furnishing">
+            <Field f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
               <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
                 <option value="">Choose</option>
                 <option value="unfurnished">Unfurnished</option>
@@ -152,7 +152,7 @@ export default function Checker({ reference }) {
                 <option value="fully furnished">Fully furnished</option>
               </select>
             </Field>
-            <Field f={byField.nearest_station} gain={gains.nearest_station} htmlFor="nearest_station">
+            <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station">
               <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
                 placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
             </Field>
@@ -201,6 +201,7 @@ export default function Checker({ reference }) {
 
       <a className="bottombar" href="#results" onClick={jumpToResults}>
         <span className="bb-score">{result.score}</span>
+        {gains.total ? <span className="gain bb-gain" key={gains.total.key} aria-live="polite">+{gains.total.amount}</span> : null}
         <span className="bb-text">
           {problems.length === 0 ? "complete" : `${problems.length} to fix`}
           {verdict ? ` · ${shortVerdict(verdict)}` : ""}
@@ -323,12 +324,15 @@ function useBenchmark(draft, result, reference, byField) {
   return bench;
 }
 
-// "+8" next to a field that gained points. Compared against the last settled state, 700 ms
-// after the draft stops changing, so typing a title shows one "+6" rather than a flicker
-// of "+0.3" per keystroke. Each gain clears itself after a couple of seconds.
+// "+8" next to a field that gained points, and the same total in the phone strip, which is
+// always on screen even when the keyboard hides the line under the input. Compared against
+// the last settled state, 700 ms after the draft stops changing, so typing a title shows one
+// "+6" rather than a flicker of "+0.3" per keystroke. Each gain clears itself after 3 s.
+const GAIN_SHOW_MS = 3000;
+
 function useGains(result) {
   const settled = useRef(null);
-  const [gains, setGains] = useState({});
+  const [gains, setGains] = useState({ fields: {}, total: null });
 
   useEffect(() => {
     const now = Object.fromEntries(result.fields.map((f) => [f.field, f.earned]));
@@ -337,19 +341,23 @@ function useGains(result) {
       const prev = settled.current;
       settled.current = now;
       const fresh = {};
+      let total = 0;
       for (const [field, earned] of Object.entries(now)) {
         const delta = earned - (prev[field] ?? 0);
         if (delta >= 0.5) fresh[field] = { amount: Math.round(delta * 10) / 10, key: Date.now() };
+        total += delta;
       }
       if (Object.keys(fresh).length === 0) return;
-      setGains((old) => ({ ...old, ...fresh }));
+      const key = Date.now();
+      const totalGain = total >= 0.5 ? { amount: Math.round(total), key } : null;
+      setGains((old) => ({ fields: { ...old.fields, ...fresh }, total: totalGain ?? old.total }));
       setTimeout(() => {
         setGains((old) => {
-          const next = { ...old };
-          for (const [field, g] of Object.entries(fresh)) if (next[field]?.key === g.key) delete next[field];
-          return next;
+          const fields = { ...old.fields };
+          for (const [field, g] of Object.entries(fresh)) if (fields[field]?.key === g.key) delete fields[field];
+          return { fields, total: old.total?.key === key ? null : old.total };
         });
-      }, 2200);
+      }, GAIN_SHOW_MS);
     }, 700);
     return () => clearTimeout(timer);
   }, [result]);

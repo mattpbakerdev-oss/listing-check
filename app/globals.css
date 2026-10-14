@@ -76,9 +76,10 @@ textarea[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-seri
 .hint:empty { display: none; }
 
 /* "+8" after a field gains points */
-.gain { color: var(--ok); font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 2.2s ease-out forwards; }
-@keyframes gain-fade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+.gain { color: var(--ok); font-weight: 600; font-size: 0.9375rem; font-variant-numeric: tabular-nums; animation: gain-fade 3s ease-out forwards; }
+@keyframes gain-fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .gain { animation: none; } }
+.bb-gain { color: #8fe3a9; font-size: 1.0625rem; margin-left: -0.25rem; }
 
 /* results */
 .results { display: grid; gap: 2rem; }

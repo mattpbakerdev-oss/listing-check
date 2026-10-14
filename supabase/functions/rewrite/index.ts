@@ -51,9 +51,15 @@ You receive the agent's draft as JSON, plus the record we hold for the building 
 
 Rules:
 - Use only facts that appear in the input. Never add amenities, facilities, views, distances, walking times, years, prices or any figure that is not there. If the input lacks something, leave it out rather than guess.
+- Do not mention the rent. It is not in the input on purpose: it has its own field on the listing.
 - Do not mention the photo count.
+- If the building record includes the year it was completed, you may mention it. If it does not, do not guess one.
 - Do not invent contract terms or deposits unless the draft states them.
 - In facts_used, list every fact you relied on, quoted from the input.`;
+
+// Mention the completion year only for buildings this new. Older years are left out of the
+// record the model sees, and the fact checker then flags any year it writes anyway.
+const RECENT_BUILDING_YEARS = 5;
 
 const norm = (s: unknown) => String(s ?? "").trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
 const json = (body: unknown, status = 200) =>
@@ -110,19 +116,24 @@ Deno.serve(async (req) => {
     const q = norm(listing.building);
     const hit = (rows ?? []).find((b: any) => norm(b.building_name) === q || (b.aliases ?? []).some((a: string) => norm(a) === q));
     if (hit) {
+      const recent = hit.completed_year !== null && hit.completed_year >= new Date().getFullYear() - RECENT_BUILDING_YEARS;
       building = {
         building_name: hit.building_name,
         area_name: (hit as any).areas?.area_name ?? null,
         nearest_station: hit.nearest_station,
         walk_min: hit.walk_min,
-        completed_year: hit.completed_year,
+        completed_year: recent ? hit.completed_year : null,
       };
     }
   }
 
   // Only pass fields the agent filled in, so the model cannot read an empty field as a fact.
+  // The rent is left out: it has its own field and should not be repeated in the description.
   const draft: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(listing)) if (v !== null && v !== undefined && String(v).trim() !== "") draft[k] = v;
+  for (const [k, v] of Object.entries(listing)) {
+    if (k === "monthly_rent_thb") continue;
+    if (v !== null && v !== undefined && String(v).trim() !== "") draft[k] = v;
+  }
   const payload = { draft, building };
 
   const anthropic = new Anthropic({ apiKey });
@@ -144,7 +155,10 @@ Deno.serve(async (req) => {
   const rewrite = response.parsed_output;
   if (!rewrite) return json({ error: "The model did not return a usable rewrite." }, 502);
 
-  const check = factCheck(rewrite, listing, building);
+  // Check against what the model was allowed to see: the draft without the rent, and the
+  // building record with the year only when recent. A rent or an old year in the output is
+  // then flagged like any other addition.
+  const check = factCheck(rewrite, { ...listing, monthly_rent_thb: null }, building);
 
   const { data: logRow, error: logError } = await supabase
     .from("rewrite_log")
