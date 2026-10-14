@@ -16,7 +16,9 @@ Not for: tenants, landlords, admin staff. One user type only.
 
 ## 3. What success looks like
 
-**Primary metric:** average completeness score of a listing after one pass through the tool, compared with the raw draft. Target: raw drafts in the sample data average around 55 out of 100; after the tool suggests fixes and the agent accepts them, the average should reach 85 or above.
+**Primary metric:** points recovered on flagged listings. Among listings that score under 85 on the first pass, the mean score before, and the mean score after the agent accepts every suggested fix. Target: flagged listings reach 85 or above on average after fixes. Measured on the sample set in the demo.
+
+(The first draft of this metric assumed raw drafts averaged around 55. That was a guess, and the first sample data averaged 98. See the build log, 14 Oct 2026.)
 
 **Secondary metric:** share of listings flagged as mispriced (more than 10% above or below the benchmark, the edge of the "about right" band in section 6) that the agent reprices before publishing. Measured on the sample set in the demo.
 
@@ -56,10 +58,11 @@ Three fields get linear partial credit: title length, description length and pho
 - Compute `rent_per_sqm = monthly_rent / size_sqm`.
 - Benchmark against the **median** rent per sqm of comparable listings. Compare like with like: the first of these with 3 or more listings wins, and the app shows which one was used.
   1. Same building, same bedroom count.
-  2. Same area, same bedroom count.
-  3. The whole area, whatever the count.
+  2. Same area, same building tier (luxury, mid, budget), same bedroom count.
+  3. Same area, same tier.
+  4. The whole area.
 - In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
-- Known weakness, measured on the sample data (see BUILD_LOG, 14 Oct 2026): slicing by bedrooms with a minimum of 3 makes the comparable groups small and the medians noisy, and it does not account for building tier. On the sample it flags more correctly priced listings than the building-only rule did. The minimum sample size and a tier adjustment are open questions for after step 3.
+- Why tier is in the chain: on the sample data it cut wrongly flagged clean listings from 28% to 14% against a bedrooms-only chain (BUILD_LOG, 14 Oct 2026). Caveat: the sample generator priced by tier, so tier is bound to look good here. It needs re-checking on real listings, where tier is a judgement call per building.
 - Report the percentage difference. Bands: within 10% is "about right", 10 to 25% is "above/below market", more than 25% is "well above/below market, check for a typo".
 - Always show the sample size the benchmark is based on. A benchmark from 4 listings looks different from one from 40.
 - Show the area's typical 1-bed rent next to it as a sanity line.
@@ -79,7 +82,7 @@ Expected failure to document: the model inventing a "pool and gym" or a "5 minut
 ## 8. Data
 
 - **Sample data, clearly labelled.** The listings table is generated from public market data: 12 areas with rent-per-sqm bands from 2026 listing medians, and 67 real condo buildings with their nearest station. See `data/SOURCES.md`.
-- About 400 listings. Around 40% are deliberately incomplete or mispriced so the tool has something to catch.
+- About 400 listings. Around 70% are deliberately incomplete or mispriced, with one to three flaws each, so the tool has something to catch.
 - The app shows a banner: "Sample data generated from public market averages. Point it at your listings table and it runs on real data."
 - A CSV importer accepts a listings file in the same column format, to make that claim true.
 

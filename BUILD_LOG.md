@@ -95,3 +95,31 @@ Scores by band: 286 listings at 100, 95 in the 90s, 18 in the 80s, 1 in the 70s.
 The cause is the generator: 60% of listings are perfect, and the rest carry one or two flaws that each cost 5 to 15 points. Real agent drafts are not like that. Two ways forward, Matt's call: regenerate with a higher flaw rate and 2 to 4 flaws per flawed listing so raw drafts land near 55, or change the metric to measure only flawed listings and the points recovered. The first keeps the spec honest; the second is cheaper. Either way, step 6 needs this fixed before the write-up.
 
 **Next:** step 3, the one screen. Decide the benchmark rule (tier-aware chain recommended) and the sample-data fix first.
+
+## 14 Oct 2026, decisions: tier-aware benchmark, new primary metric, harder sample data
+
+**Benchmark.** Matt's bedrooms-only chain was worse than the original on the sample: clean listings wrongly flagged rose from 16% to 28%, mispriced caught fell from 50 to 46 of 51. Switched to the tier-aware chain in migration `20261014150000_benchmark_by_tier.sql`: same building and bedrooms, else same area, tier and bedrooms, else same area and tier, else the whole area. Same function signature, so nothing upstream changed. Caveat recorded in SPEC section 6: the generator priced listings by tier, so tier is bound to look good on this sample. It needs re-checking on real data, where tier is a judgement per building.
+
+**Measurement was flattering itself.** Benchmarking a sample listing that is already in the table makes it one of its own comparables. In a group of 3 it is a third of the median, so it looks correctly priced whatever its rent. Migration `20261014160000_benchmark_exclude_self.sql` adds an optional `p_exclude_listing_id` parameter (default null, the app passes nothing, so the v1 decision to not exclude self in the UI stands). The check script now measures with the listing excluded, which is what a new draft experiences. The difference is large:
+
+| Tier chain, regenerated data (112 clean, 122 mispriced) | Clean wrongly flagged (>10%) | Mispriced caught (>10%) | Typo-priced in the >25% band |
+|---|---|---|---|
+| Self included (the old, flattering way) | 14% | 84% | 45 of 46 |
+| Self excluded (honest) | 35% | 97% | 46 of 46 |
+
+The honest row is the one to quote. The benchmark catches almost every mispriced listing and every price typo, and it wrongly questions about a third of correctly priced ones. That false-flag rate is mostly sample size: with 400 listings over 67 buildings and 3 tiers, many comparable groups have 3 to 5 members and their medians are noisy. The check script gates on the catch rates (85% and 90%) and reports the false-flag rate rather than gating it. The SQL numbers matched a client-side recomputation exactly, which is a decent check that the migration does what it says.
+
+**Primary metric.** The 55-point "before" figure in the first spec was a guess that did not match the data: raw drafts averaged 98. Section 3 now reads "points recovered on flagged listings": among listings under 85 on first pass, mean score before and after the agent accepts every suggested fix, target 85 or above after.
+
+**Sample data regenerated.** `generate_listings.py` now defaults to a 70% flaw rate with 1 to 3 flaws per flawed listing (was 40% with 1 or 2). Same seed, so the rows are reproducible. Reseeded with `npm run seed`. Raw scores from `node scripts/score-sample.mjs`:
+
+| Group | n | Mean |
+|---|---|---|
+| All listings | 400 | 92.4 |
+| No flaws | 112 | 100.0 |
+| With flaws | 288 | 89.5 |
+| Flagged, under 85 | 71 | 79.6 |
+
+Distribution: 145 at 100, 130 in the 90s, 95 in the 80s, 30 in the 70s. So the metric's "before" number is 79.6 across 71 flagged listings. Even three flaws rarely drop a listing below 70, because most flaws cost 5 to 10 points and the generator never blanks the big-ticket fields (building, area, bedrooms) or the station. That is a fair model of a sloppy-but-not-empty draft. Points lost across the sample, largest first: description 610, size 520, photos 494, floor 384.
+
+**Unit tests** still 102 of 102.

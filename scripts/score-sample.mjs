@@ -40,9 +40,13 @@ const avg = (xs) => (xs.reduce((s, x) => s + x, 0) / xs.length).toFixed(1);
 const clean = scored.filter((s) => !s.l.flaws);
 const flawed = scored.filter((s) => s.l.flaws);
 
+const FLAG_BELOW = 85; // SPEC section 3: the primary metric is measured on listings scoring under this on first pass
+const flagged = scored.filter((s) => s.r.score < FLAG_BELOW);
+
 console.log(`all listings      n=${scored.length}  mean ${avg(scored.map((s) => s.r.score))}`);
 console.log(`no flaws          n=${clean.length}  mean ${avg(clean.map((s) => s.r.score))}`);
 console.log(`with flaws        n=${flawed.length}  mean ${avg(flawed.map((s) => s.r.score))}`);
+console.log(`flagged (<${FLAG_BELOW})     n=${flagged.length}  mean ${flagged.length ? avg(flagged.map((s) => s.r.score)) : "-"}   <- the "before" number for the primary metric`);
 
 const buckets = {};
 for (const { r } of scored) {

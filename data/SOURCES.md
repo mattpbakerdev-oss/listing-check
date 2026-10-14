@@ -30,5 +30,5 @@ Sanity checks: FazWaz citywide median about 629 THB/sqm (Sep 2026); CBRE Q2 2026
 
 - Picks a building, draws a unit type and size.
 - Price = area typical per sqm, times a tier multiplier (luxury 1.22, mid 1.02, budget 0.88), times an age discount, times a small-unit premium, plus noise, clamped to the area band.
-- 40% of listings get one or two deliberate flaws (missing floor, few photos, short description, caps title, overpriced, typo in price, and so on). The `flaws` column is the ground truth for measuring the checker. It would be empty on real data.
+- 70% of listings get one to three deliberate flaws (missing floor, few photos, short description, caps title, overpriced, typo in price, and so on). The `flaws` column is the ground truth for measuring the checker. It would be empty on real data. The first cut used 40% with one or two flaws, which left raw drafts averaging 98 out of 100.
 - Thai descriptions are simple templates, enough to exercise the bilingual rewrite, not natural copy.

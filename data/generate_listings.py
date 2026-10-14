@@ -5,9 +5,10 @@ Generate a grounded sample dataset of Bangkok condo rental listings.
 Reads areas.csv and buildings.csv, writes listings.csv.
 Prices are drawn around each area's rent-per-sqm band (from public 2026
 listing medians, see SOURCES.md), adjusted by building tier and age.
-About 40% of listings carry one or more deliberate flaws so the checker
+About 70% of listings carry one to three deliberate flaws so the checker
 has something to catch. The `flaws` column records the ground truth so the
-completeness metric can be measured.
+completeness metric can be measured. (The first cut used 40% with one or two
+flaws; raw drafts then averaged 98 out of 100 and the metric had nothing to show.)
 
 Usage: python3 generate_listings.py [--n 400] [--seed 42]
 """
@@ -97,7 +98,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=400)
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--flaw-rate", type=float, default=0.40)
+    ap.add_argument("--flaw-rate", type=float, default=0.70)
     args = ap.parse_args()
     rng = random.Random(args.seed)
 
@@ -125,7 +126,7 @@ def main():
 
         flaws = []
         if rng.random() < args.flaw_rate:
-            k = 1 if rng.random() < 0.7 else 2
+            k = rng.randint(1, 3)
             flaws = rng.sample(FLAW_TYPES, k=k)
             if "overpriced" in flaws and "underpriced" in flaws:
                 flaws.remove("underpriced")
