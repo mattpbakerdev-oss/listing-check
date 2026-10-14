@@ -67,3 +67,31 @@ Studios specifically: 11 of 34 clean studios were flagged before, 10 of 34 now. 
 **Decision for now.** The bedroom rule stays deployed as specified. The check script no longer asserts that L0001 is within 10%, because it is not; it asserts that at least 85% of mispriced listings are caught (46 of 51 today) and prints the false-flag rate. Recommendation: before step 3 wires the UI to the benchmark, switch to the tier-aware chain, since it beats both the original and the bedroom rule on every column. Caveat: `tier` is a hand-judged column in the sample data. Real listings would need it set per building, which the aliases workflow could absorb.
 
 **How this was measured.** A scratch script computed all variants client-side from the listings table. The deployed rule's numbers were then confirmed through the real `benchmark_listing` function by `npm run check`.
+
+## 14 Oct 2026, step 2 done: completeness scoring, pure function with tests
+
+**What was built.** `lib/completeness/score.js` exports `scoreListing(draft, reference)` and returns the integer score, one entry per field with points earned, a status (ok, partial, missing, invalid) and a message the UI can show, plus the matched building, area and station. All thresholds, points, keyword patterns and matching live in `lib/completeness/rules.js`. No database, no UI. Tests were written first from the section 5 table: 102 cases, all passing with `npm test` (Node's built-in runner, no test dependency).
+
+**Rulings made while turning the table into code**
+
+- Title (10): 6 points for length, linear up to 20 characters, full to 80, then declining to zero at 160. 2 points for naming a known building, alias or area. 2 points for not being ALL CAPS. The spec said only length gets partial credit, so the other two are all or nothing, but splitting the 10 keeps an ALL CAPS title from scoring zero.
+- Description (15): 10 for length, linear to 150 characters, plus 5 for mentioning at least two of floor, view, furnishing, station. This is the only split that reproduces the spec's example of a 120-character description scoring 8. Mentions are detected by keyword in English and Thai. Length is measured on the English description only; the optional Thai draft is not scored in v1.
+- Building: exact match after lower-casing, trimming and collapsing spaces and hyphens, on the name or any alias. "The Met Sathorn" does not match "The Met". Area: same, on the id, the full name, or either half of a "Sathorn / Chong Nonsi" name.
+- Numbers accept strings from a form, including "35,000". A non-numeric value is "invalid", not "missing".
+- Furnishing accepts "Fully-Furnished" and odd spacing, but "furnished" alone is invalid.
+- Photos: linear to 5. Zero photos reports as "missing".
+- Nearest station: a typed value wins; otherwise it is filled from the matched building and the message says so.
+
+**Sample data finding: the "before" number is not 55.** `node scripts/score-sample.mjs` scores all 400 sample listings as an agent would have typed them.
+
+| Group | n | Mean score |
+|---|---|---|
+| All listings | 400 | 97.8 |
+| No flaws | 251 | 100.0 |
+| With flaws | 149 | 94.1 |
+
+Scores by band: 286 listings at 100, 95 in the 90s, 18 in the 80s, 1 in the 70s. The worst flaw type (short description) still averages 86. The spec's primary metric assumes raw drafts average around 55 and targets 85 after the tool. On this sample the target is met before the tool runs, so the metric cannot show anything. The scorer is not being lenient: every listing the generator marks clean scores exactly 100, which is what the table says should happen.
+
+The cause is the generator: 60% of listings are perfect, and the rest carry one or two flaws that each cost 5 to 15 points. Real agent drafts are not like that. Two ways forward, Matt's call: regenerate with a higher flaw rate and 2 to 4 flaws per flawed listing so raw drafts land near 55, or change the metric to measure only flawed listings and the points recovered. The first keeps the spec honest; the second is cheaper. Either way, step 6 needs this fixed before the write-up.
+
+**Next:** step 3, the one screen. Decide the benchmark rule (tier-aware chain recommended) and the sample-data fix first.

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "seed": "node --env-file=.env.local scripts/seed.mjs",
     "check": "node --env-file=.env.local scripts/check-benchmark.mjs"
   },
