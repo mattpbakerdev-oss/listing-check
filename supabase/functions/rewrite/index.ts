@@ -24,6 +24,10 @@ import { factCheck, type ListingInput } from "../_shared/factcheck.ts";
 const DEFAULT_MODEL = "claude-sonnet-5-5";
 const ALLOWED_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-sonnet-5-5", "claude-haiku-4-5"];
 
+// Rate limits, counted from rewrite_log. Per IP per rolling hour, and in total per rolling 24 hours.
+const PER_IP_PER_HOUR = 20;
+const TOTAL_PER_DAY = 300;
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -81,6 +85,22 @@ Deno.serve(async (req) => {
   const listingId = typeof body.listing_id === "string" ? body.listing_id : null;
   const model = ALLOWED_MODELS.includes(String(body.model)) ? String(body.model) : DEFAULT_MODEL;
 
+  // Rate limit before spending any model tokens.
+  const clientIp = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const [perIp, total] = await Promise.all([
+    supabase.from("rewrite_log").select("id", { count: "exact", head: true }).eq("client_ip", clientIp).gte("created_at", hourAgo),
+    supabase.from("rewrite_log").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
+  ]);
+  if (perIp.error || total.error) return json({ error: "Could not check the rewrite limit. Try again in a moment." }, 500);
+  if ((total.count ?? 0) >= TOTAL_PER_DAY) {
+    return json({ error: `The rewrite has reached its daily limit of ${TOTAL_PER_DAY}. It resets over the next 24 hours.` }, 429);
+  }
+  if ((perIp.count ?? 0) >= PER_IP_PER_HOUR) {
+    return json({ error: `You have used ${PER_IP_PER_HOUR} rewrites in the last hour, which is the limit. Try again a bit later.` }, 429);
+  }
+
   // Resolve the building the same way the completeness checker does: case-insensitive name or alias.
   let building: { building_name: string; area_name: string | null; nearest_station: string; walk_min: number | null; completed_year: number | null } | null = null;
   if (listing.building) {
@@ -130,6 +150,7 @@ Deno.serve(async (req) => {
     .from("rewrite_log")
     .insert({
       listing_id: listingId,
+      client_ip: clientIp,
       model: response.model,
       prompt: { system: SYSTEM, input: payload },
       response: { output: rewrite, usage: response.usage, stop_reason: response.stop_reason },

@@ -138,6 +138,18 @@ mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid va
 .rw-actions { display: flex; gap: 0.5rem; }
 button:disabled { opacity: 0.45; cursor: default; }
 
+/* export and import */
+.export { border-top: 1px solid var(--rule); padding-top: 1.5rem; display: grid; gap: 1rem; }
+.export-text { font-family: var(--font); line-height: 1.5; background: var(--well); }
+a.plain { text-decoration: none; }
+.import p { max-width: 70ch; }
+.import code { font-size: 0.9em; }
+.import-report { display: grid; gap: 0.75rem; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+th, td { text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); }
+
 /* fixed score strip on phones */
 .bottombar {
   position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 0.75rem;

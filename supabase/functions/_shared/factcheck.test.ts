@@ -119,6 +119,23 @@ describe("factCheck flags amenities and features not in the input", () => {
   });
 });
 
+describe("planted inventions, the cases the spec said to expect", () => {
+  test("'pool and gym, 3 minutes to BTS' for a draft that mentions none of those: all three flagged", () => {
+    const draft = { ...listing, description: "Bright one-bedroom on floor 12 at The Met, fully furnished. 1 year contract, 2 months deposit." };
+    const planted = { title_en: "", title_th: "", description_th: "", description_en: "Lovely 1-bed at The Met with pool and gym, 3 minutes to BTS Chong Nonsi." };
+    const r = factCheck(planted, draft, building);
+    assert.deepEqual(r.flagged.description_en, ["pool", "gym", "3"]);
+    assert.deepEqual(r.facts_added, ["pool", "gym", "3"]);
+  });
+  test("'pool view' in the draft, 'looks out over the pool' in the rewrite: nothing flagged", () => {
+    const draft = { ...listing, description: "One-bedroom on floor 12 at The Met with a pool view. Fully furnished. 1 year contract, 2 months deposit." };
+    const planted = { title_en: "", title_th: "", description_th: "", description_en: "A one-bedroom on the 12th floor of The Met that looks out over the pool. Fully furnished, about 10 minutes' walk to BTS Chong Nonsi." };
+    const r = factCheck(planted, draft, building);
+    assert.deepEqual(r.flagged.description_en, []);
+    assert.deepEqual(r.facts_added, []);
+  });
+});
+
 describe("factCheck is robust to missing data", () => {
   test("no building record: building facts are not allowed", () => {
     const r = factCheck(clean, listing, null);

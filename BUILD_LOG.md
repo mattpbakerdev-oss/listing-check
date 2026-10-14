@@ -191,3 +191,19 @@ Prices from the platform pricing page: Opus 5 at $5 in and $25 out per million t
 **Things that went wrong.** The first model key was not scoped to a workspace and the API refused every call until Matt replaced it. The slowest Sonnet call (L0001 at 11.5 s) landed while the function was being redeployed with the checker fix; the median is the number to trust. The rewrite function is callable by anyone holding the anon key, at model cost; rate limiting is on the "next" list.
 
 **Next:** step 5, export and CSV import.
+
+## 14 Oct 2026, rate limit and two planted tests
+
+**Rate limit.** The rewrite function now refuses before spending tokens: 20 rewrites per IP in any rolling hour, 300 in total in any rolling 24 hours, counted from `rewrite_log`, which gained a `client_ip` column (migration `20261014200000`). Over the limit the agent sees "You have used 20 rewrites in the last hour, which is the limit. Try again a bit later." or the daily equivalent. Rolling windows rather than calendar days because they need no clock-zone decisions and the counts are one query each. Moved off the "next" list in the spec.
+
+**Two planted tests on the checker**, as asked. A rewrite containing "pool and gym, 3 minutes to BTS" for a draft that mentions none of those: all three flagged, in order. And "pool view" in the draft with "looks out over the pool" in the rewrite: nothing flagged, so the fix from the Opus run stays fixed. 150 tests.
+
+## 14 Oct 2026, step 5 done: export and CSV import
+
+**Export.** An Export section under the rewrite with three buttons: copy as text, copy as JSON, download JSON. The text is what an agent pastes into a portal: title, Thai title, a facts line ("1 bed · 1 bath · 45 sqm · floor 12 · fully furnished"), the building, area and station, the rent, then both descriptions. Empty things are left out rather than printed blank, and the score and benchmark are not in it, because it is the listing, not the report. The JSON carries the listings.csv columns with numbers as numbers and blanks as null, plus the score, the per-field results and the benchmark. Both are pure functions in `lib/export/format.js` with 9 tests.
+
+**Import.** `/import` takes a CSV with the same columns as `data/listings.csv` and an import key. The route validates every row with `lib/import/validate.js` (16 tests): a row needs a listing_id, a known building_id or area_id (area filled from the building when blank), numbers that are numbers, a rent and size above zero, a date that is a date, and a status of active or let. Incomplete rows load; missing floor or photos are what the checker is for. Unknown extra columns are ignored. Each skipped row is reported with its CSV row number and a reason, and a bad row never stops the good ones. Rows with an existing listing_id replace it. Loading happens server-side with the service role key, which never reaches the browser. The import key is a shared secret, `IMPORT_KEY` on the server, so a public URL cannot be used to overwrite the table.
+
+**Verified end to end** on the running dev server with a four-row file: one good row with a blank area and a rent written "35,000", one unknown building, one non-numeric size, one duplicate id. Wrong key: 401. Right key: loaded 1, skipped 3, each with the right reason and row number. The test row was then removed; the sample is back to 400 listings. `next build` clean, 175 tests.
+
+**Next:** step 6, deploy to Vercel.

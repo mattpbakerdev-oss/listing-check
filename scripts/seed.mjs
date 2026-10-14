@@ -8,25 +8,13 @@
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "csv-parse/sync";
 import { createClient } from "@supabase/supabase-js";
+import { parseCsv, normaliseRow } from "../lib/import/csv.js";
+
+export { parseCsv, normaliseRow };
 
 const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "data");
 const CHUNK = 200;
-
-export function parseCsv(text) {
-  return parse(text, { columns: true, skip_empty_lines: true, bom: true });
-}
-
-// Empty strings mean "not provided". Postgres would reject '' for integer columns,
-// and the completeness checker treats NULL as missing, so map every empty cell to null.
-export function normaliseRow(row) {
-  const out = {};
-  for (const [k, v] of Object.entries(row)) {
-    out[k] = typeof v === "string" && v.trim() === "" ? null : v;
-  }
-  return out;
-}
 
 function requireEnv(name) {
   const v = process.env[name];

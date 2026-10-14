@@ -6,6 +6,7 @@ import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import RewritePanel from "./rewrite.js";
+import ExportPanel from "./export.js";
 
 const EMPTY = {
   title: "", description: "", description_th: "", title_th: "", building: "", area: "", size_sqm: "", floor: "",
@@ -68,7 +69,7 @@ export default function Checker({ reference }) {
       <header className="top">
         <h1>Listing check</h1>
         <p className="banner">
-          Sample data generated from public market averages. Point it at your listings table and it runs on real data.
+          Sample data generated from public market averages. <a href="/import">Import your listings</a> and it runs on real data.
         </p>
       </header>
 
@@ -191,6 +192,7 @@ export default function Checker({ reference }) {
 
       <div className="layout single">
         <RewritePanel draft={draft} setDraft={setDraft} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
+        <ExportPanel draft={draft} result={result} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 
       <a className="bottombar" href="#results" onClick={jumpToResults}>
