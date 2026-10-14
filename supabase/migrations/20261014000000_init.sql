@@ -1,6 +1,6 @@
 -- Listing Check: Supabase schema v1
--- Run in the Supabase SQL editor, then import the CSVs from /data in this order:
--- areas.csv -> buildings.csv -> listings.csv (Table editor > Import data from CSV).
+-- Applied with `supabase db push`. Load the sample data afterwards with `npm run seed`,
+-- which upserts data/areas.csv -> buildings.csv -> listings.csv in that order.
 
 create table if not exists areas (
   area_id           text primary key,
@@ -19,7 +19,8 @@ create table if not exists buildings (
   nearest_station text not null,
   walk_min        integer,
   completed_year  integer,
-  tier            text check (tier in ('luxury','mid','budget'))
+  tier            text check (tier in ('luxury','mid','budget')),
+  aliases         text[] not null default '{}'   -- other names agents use for the building; matched case-insensitively, filled as we go
 );
 
 create table if not exists listings (
@@ -58,8 +59,10 @@ create table if not exists rewrite_log (
 create index if not exists listings_building_idx on listings(building_id);
 create index if not exists listings_area_idx on listings(area_id);
 
+-- Views run as the caller (security_invoker) so the RLS policies below apply to them too.
+
 -- Rent per sqm for every priced listing.
-create or replace view listing_rent_sqm as
+create or replace view listing_rent_sqm with (security_invoker = true) as
 select
   l.listing_id, l.building_id, l.area_id,
   l.monthly_rent_thb, l.size_sqm,
@@ -68,24 +71,27 @@ from listings l
 where l.monthly_rent_thb is not null and l.size_sqm is not null and l.size_sqm > 0;
 
 -- Median rent per sqm by building, with sample size.
-create or replace view building_benchmark as
+create or replace view building_benchmark with (security_invoker = true) as
 select
   building_id,
   count(*) as n,
-  percentile_cont(0.5) within group (order by rent_per_sqm) as median_rent_per_sqm
+  -- percentile_cont returns double precision; cast so round(numeric, int) works in benchmark_listing
+  (percentile_cont(0.5) within group (order by rent_per_sqm))::numeric as median_rent_per_sqm
 from listing_rent_sqm
 group by building_id;
 
 -- Median rent per sqm by area, with sample size.
-create or replace view area_benchmark as
+create or replace view area_benchmark with (security_invoker = true) as
 select
   area_id,
   count(*) as n,
-  percentile_cont(0.5) within group (order by rent_per_sqm) as median_rent_per_sqm
+  (percentile_cont(0.5) within group (order by rent_per_sqm))::numeric as median_rent_per_sqm
 from listing_rent_sqm
 group by area_id;
 
 -- The benchmark function the app calls: same building if 3+ comparables, else the area.
+-- v1 deliberately includes 'let' listings as comparables and does not exclude the
+-- listing being checked from its own benchmark (see SPEC.md section 13).
 create or replace function benchmark_listing(p_building_id text, p_area_id text, p_rent integer, p_size integer)
 returns table (
   basis text, n bigint, median_rent_per_sqm numeric, listing_rent_per_sqm numeric, pct_diff numeric
@@ -105,3 +111,16 @@ returns table (
     round(((p_rent::numeric / nullif(p_size, 0)) - median_rent_per_sqm) / median_rent_per_sqm * 100, 1) as pct_diff
   from pick;
 $$;
+
+-- Row-level security. The browser (anon key) may read reference data and listings.
+-- Nothing is writable with the anon key: writes go through server-side code using the
+-- service role key, which bypasses RLS. rewrite_log has no policies at all, so it is
+-- reachable only with the service role key.
+alter table areas       enable row level security;
+alter table buildings   enable row level security;
+alter table listings    enable row level security;
+alter table rewrite_log enable row level security;
+
+create policy "anon can read areas"     on areas     for select to anon, authenticated using (true);
+create policy "anon can read buildings" on buildings for select to anon, authenticated using (true);
+create policy "anon can read listings"  on listings  for select to anon, authenticated using (true);

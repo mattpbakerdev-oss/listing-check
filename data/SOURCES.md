@@ -24,7 +24,7 @@ Sanity checks: FazWaz citywide median about 629 THB/sqm (Sep 2026); CBRE Q2 2026
 
 ## Buildings (`buildings.csv`)
 
-62 real condominiums, confirmed on FazWaz or PropertyScout listing pages. Nearest station, completion year and tier are as listed there or judged from rent level and developer. Walk minutes are straight-line distance divided by 80 m/min, so treat them as rough.
+67 real condominiums, confirmed on FazWaz or PropertyScout listing pages. Nearest station, completion year and tier are as listed there or judged from rent level and developer. Walk minutes are straight-line distance divided by 80 m/min, so treat them as rough.
 
 ## How the generator works (`generate_listings.py`)
 

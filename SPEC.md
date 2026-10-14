@@ -18,16 +18,16 @@ Not for: tenants, landlords, admin staff. One user type only.
 
 **Primary metric:** average completeness score of a listing after one pass through the tool, compared with the raw draft. Target: raw drafts in the sample data average around 55 out of 100; after the tool suggests fixes and the agent accepts them, the average should reach 85 or above.
 
-**Secondary metric:** share of listings flagged as mispriced (more than 15% above or below the benchmark) that the agent reprices before publishing. Measured on the sample set in the demo.
+**Secondary metric:** share of listings flagged as mispriced (more than 10% above or below the benchmark, the edge of the "about right" band in section 6) that the agent reprices before publishing. Measured on the sample set in the demo.
 
 **What I'm not measuring yet:** real enquiry rates. That needs production data and belongs in the "next" section.
 
 ## 4. The feature, in one screen
 
-1. The agent pastes or types a draft listing: title, description, building, area, size (sqm), floor, bedrooms, bathrooms, monthly rent, furnishing, photo count.
+1. The agent pastes or types a draft listing: title, description, an optional Thai description, building, area, size (sqm), floor, bedrooms, bathrooms, monthly rent, furnishing, photo count.
 2. The tool shows a **completeness score** (0 to 100) and the exact fields that are missing or weak.
 3. The tool shows a **price benchmark**: rent per sqm for this listing against the median for the same building (if we have 3 or more listings), otherwise the same area. It says "about right", "above market" or "below market" with the percentage.
-4. The tool offers an **AI rewrite**: a cleaner English title and description, and a Thai version. The agent accepts or edits each one. Nothing is applied without a click.
+4. The tool offers an **AI rewrite**: a cleaner English title and description, and a Thai version, whether or not a Thai draft was supplied. The agent accepts or edits each one. Nothing is applied without a click.
 5. The agent copies the finished listing out, or exports it as JSON.
 
 ## 5. Completeness checklist and scoring
@@ -38,7 +38,7 @@ Points add to 100. A field scores only when it's present and passes the check.
 |---|---|---|
 | Title | 10 | 20 to 80 characters, names the building or area, no ALL CAPS |
 | Description | 15 | 150 characters or more, mentions at least two of: floor, view, furnishing, nearest station |
-| Building | 10 | Present and matches a known building in our table |
+| Building | 10 | Present and matches a known building in our table, case-insensitively on its name or one of its aliases. No fuzzy matching in v1 |
 | Area | 5 | Present and matches a known area |
 | Size (sqm) | 10 | Present, between 20 and 400 |
 | Floor | 8 | Present, between 1 and 80 |
@@ -49,12 +49,12 @@ Points add to 100. A field scores only when it's present and passes the check.
 | Photo count | 10 | 5 or more |
 | Nearest station | 7 | Present, or derivable from the building table |
 
-Weak fields get partial credit (for example a 120-character description scores 8 of 15). The rules live in one file so they're easy to change.
+Three fields get linear partial credit: title length, description length and photo count (for example a 120-character description scores 8 of 15). Every other field is all or nothing. The rules live in one file so they're easy to change.
 
 ## 6. Price benchmark rules
 
 - Compute `rent_per_sqm = monthly_rent / size_sqm`.
-- Benchmark against the **median** rent per sqm of comparable listings, where comparable means same building with 3 or more listings, else same area.
+- Benchmark against the **median** rent per sqm of comparable listings, where comparable means same building with 3 or more listings, else same area. In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
 - Report the percentage difference. Bands: within 10% is "about right", 10 to 25% is "above/below market", more than 25% is "well above/below market, check for a typo".
 - Always show the sample size the benchmark is based on. A benchmark from 4 listings looks different from one from 40.
 - Show the area's typical 1-bed rent next to it as a sanity line.
@@ -73,7 +73,7 @@ Expected failure to document: the model inventing a "pool and gym" or a "5 minut
 
 ## 8. Data
 
-- **Sample data, clearly labelled.** The listings table is generated from public market data: 12 areas with rent-per-sqm bands from 2026 listing medians, and 60 real condo buildings with their nearest station. See `data/SOURCES.md`.
+- **Sample data, clearly labelled.** The listings table is generated from public market data: 12 areas with rent-per-sqm bands from 2026 listing medians, and 67 real condo buildings with their nearest station. See `data/SOURCES.md`.
 - About 400 listings. Around 40% are deliberately incomplete or mispriced so the tool has something to catch.
 - The app shows a banner: "Sample data generated from public market averages. Point it at your listings table and it runs on real data."
 - A CSV importer accepts a listings file in the same column format, to make that claim true.
@@ -94,7 +94,9 @@ Expected failure to document: the model inventing a "pool and gym" or a "5 minut
 
 ## 11. Data model
 
-Tables: `areas`, `buildings`, `listings`, `rewrite_log`. Full schema in `supabase/schema.sql`. Listings reference buildings, buildings reference areas. The benchmark is a single SQL query over `listings` grouped by building or area.
+Tables: `areas`, `buildings`, `listings`, `rewrite_log`. Full schema in `supabase/migrations/`, applied with `supabase db push`. Listings reference buildings, buildings reference areas. Buildings carry an `aliases` array for the other names agents use. The benchmark is a single SQL query over `listings` grouped by building or area.
+
+Row-level security: the anon key can read `areas`, `buildings`, `listings` and the benchmark views, and write nothing. `rewrite_log` and all writes go through server-side code with the service role key.
 
 ## 12. Build order
 
@@ -111,3 +113,5 @@ Tables: `areas`, `buildings`, `listings`, `rewrite_log`. Full schema in `supabas
 - Photo checks: count, resolution, duplicates.
 - A "fix all" button once the agent trusts the rewrite.
 - Thai-first drafts with an English rewrite, since many agents write Thai first.
+- Tighten the benchmark population: exclude "let" listings older than some cutoff, and exclude the listing being checked from its own benchmark. v1 includes both.
+- Fuzzy building matching once the aliases list shows which misspellings are common.
