@@ -138,6 +138,32 @@ mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid va
 .rw-actions { display: flex; gap: 0.5rem; }
 button:disabled { opacity: 0.45; cursor: default; }
 
+/* review overlay: a sheet on phones, a centred panel on wider screens */
+.overlay-backdrop { position: fixed; inset: 0; background: rgba(20, 33, 61, 0.45); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.overlay {
+  background: var(--paper); color: var(--ink); width: 100%; max-height: 92vh; overflow-y: auto;
+  border-radius: 14px 14px 0 0; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  display: grid; gap: 1rem; align-content: start;
+  animation: sheet-up 220ms ease-out;
+}
+@keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (min-width: 900px) {
+  .overlay-backdrop { align-items: center; padding: 2rem; }
+  .overlay { max-width: 960px; max-height: 88vh; border-radius: 12px; padding: 1.5rem; animation-name: panel-in; }
+  @keyframes panel-in { from { transform: scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
+}
+@media (prefers-reduced-motion: reduce) { .overlay { animation: none; } }
+.overlay-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.overlay-head h2 { margin: 0; font-size: 1.25rem; }
+.overlay-head h2:focus { outline: none; }
+.overlay-progress { color: var(--muted); font-size: 0.9375rem; }
+.overlay-cards { display: grid; gap: 0.75rem; }
+.rw-card { display: grid; gap: 0.5rem; padding: 0.875rem; border: 1px solid var(--rule); border-radius: 8px; }
+.rw-card h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.rw-card-done { grid-template-columns: auto 1fr; align-items: center; gap: 0.6rem; background: var(--ok-soft); border-color: transparent; padding: 0.65rem 0.875rem; min-height: 44px; }
+.tick { color: var(--ok); font-weight: 700; }
+.overlay-foot { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; position: sticky; bottom: 0; background: var(--paper); padding-top: 0.5rem; }
+
 /* export and import */
 .export { border-top: 1px solid var(--rule); padding-top: 1.5rem; display: grid; gap: 1rem; }
 .export-text { font-family: var(--font); line-height: 1.5; background: var(--well); }
