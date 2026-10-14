@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
     .from("rewrite_log")
     .insert({
       listing_id: listingId,
-      client_ip: clientIp,
+      client_ip: isServiceRole ? "service_role" : clientIp,  // script runs must not count against the office IP they ran from
       model: response.model,
       prompt: { system: SYSTEM, input: payload },
       response: { output: rewrite, usage: response.usage, stop_reason: response.stop_reason },

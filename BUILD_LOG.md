@@ -253,4 +253,8 @@ Two notes on what the number means. First, the structured fixes do most of the w
 
 What went wrong, in order. The first metric run hit the rewrite rate limit after 16 fresh calls: the service-role bypass compared the Authorization header with the key from the function's environment and they did not match in the edge runtime. Replaced with a check of the role claim in the already-verified JWT, which is the right way round anyway. Confirmed anon still gets a 429 while this IP is over its hour while the service role gets a 200. The second run reused the 16 logged rewrites by comparing the logged draft with the fixed draft, so they were not paid for twice.
 
+**Rate limit raised, and a side effect found.** Per-IP limit is now 60 an hour because an office shares one IP; the daily cap stays at 300. Verifying it turned up a flaw: service-role calls skipped the limit but were still logged with the IP they ran from, so the 55 metric-run calls had pushed this IP over 60 and the browser was refused. Service-role rows are now logged with `client_ip = "service_role"`, and the last hour's metric rows were re-attributed the same way so the count reflects browser calls only.
+
+**README** added with the live link, the two screenshots, the metric table and a two-line how-to-run.
+
 **Still to do from the build order:** record the 60-second walkthrough. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.
