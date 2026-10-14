@@ -17,7 +17,10 @@ import { zodOutputFormat } from "npm:@anthropic-ai/sdk/helpers/zod";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { factCheck, type ListingInput } from "../_shared/factcheck.ts";
 
-const MODEL = "claude-opus-5";
+// Default model, and the models a caller may ask for instead (used by scripts/rewrite-sample.mjs
+// to compare). Anything else falls back to the default.
+const DEFAULT_MODEL = "claude-opus-5";
+const ALLOWED_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-sonnet-5-5", "claude-haiku-4-5"];
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -74,6 +77,7 @@ Deno.serve(async (req) => {
 
   const listing = (body.listing ?? {}) as ListingInput;
   const listingId = typeof body.listing_id === "string" ? body.listing_id : null;
+  const model = ALLOWED_MODELS.includes(String(body.model)) ? String(body.model) : DEFAULT_MODEL;
 
   // Resolve the building the same way the completeness checker does: case-insensitive name or alias.
   let building: { building_name: string; area_name: string | null; nearest_station: string; walk_min: number | null; completed_year: number | null } | null = null;
@@ -99,11 +103,16 @@ Deno.serve(async (req) => {
   for (const [k, v] of Object.entries(listing)) if (v !== null && v !== undefined && String(v).trim() !== "") draft[k] = v;
   const payload = { draft, building };
 
-  const anthropic = new Anthropic({ apiKey });
+  // A key that is not scoped to a workspace must name one on every request.
+  const workspaceId = Deno.env.get("ANTHROPIC_WORKSPACE_ID");
+  const anthropic = new Anthropic({
+    apiKey,
+    defaultHeaders: workspaceId ? { "anthropic-workspace-id": workspaceId } : undefined,
+  });
   let response;
   try {
     response = await anthropic.messages.parse({
-      model: MODEL,
+      model,
       max_tokens: 4096,
       system: SYSTEM,
       messages: [{ role: "user", content: JSON.stringify(payload, null, 2) }],
@@ -140,5 +149,6 @@ Deno.serve(async (req) => {
     flagged: check.flagged,
     facts_added: check.facts_added,
     building: building ? building.building_name : null,
+    usage: response.usage,
   });
 });

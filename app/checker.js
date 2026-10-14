@@ -268,6 +268,7 @@ function Benchmark({ bench, draft, result, reference }) {
         <strong>{verdict.label[0].toUpperCase() + verdict.label.slice(1)}</strong>
         {Math.abs(pct) > 10 ? <span>, {Math.abs(pct).toFixed(0)}% {pct > 0 ? "above" : "below"} the median</span> : null}
       </p>
+      {verdict.tone === "note" ? <p className="hint">Medians from a few hundred listings are rough. A difference this size is worth a look, not an alarm.</p> : null}
       <dl className="bench-facts">
         <div><dt>This listing</dt><dd>{baht(d.listing_rent_per_sqm)} per sqm</dd></div>
         <div><dt>Median for {basis}</dt><dd>{baht(d.median_rent_per_sqm)} per sqm, from {d.n} listings</dd></div>

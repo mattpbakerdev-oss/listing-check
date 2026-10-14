@@ -139,6 +139,8 @@ async function main() {
   console.log(`info  self excluded (honest):   clean wrongly flagged >10% ${pctOf(excl.falseFlags, cleanAll.length)}, >25% ${excl.falseTypo}; mispriced caught ${pctOf(excl.caught, mispricedAll.length)}`);
   check(excl.caught / mispricedAll.length >= 0.85, "at least 85% of mispriced listings are flagged (self excluded)", pctOf(excl.caught, mispricedAll.length));
   check(excl.typoCaught / typoAll.length >= 0.9, "at least 90% of typo-priced listings land in the 'check for a typo' band", pctOf(excl.typoCaught, typoAll.length));
+  // The only red band is over 25%. Matt's bar (14 Oct review): under 10% of fair prices may land there.
+  check(excl.falseTypo / cleanAll.length < 0.1, "under 10% of clean listings land in the red 'check for a typo' band (self excluded)", pctOf(excl.falseTypo, cleanAll.length));
 
   // 6. RLS: anon reads listings, cannot write anything, cannot see rewrite_log.
   const { data: anonRows, error: anonReadErr } = await anon.from("listings").select("listing_id").limit(1);

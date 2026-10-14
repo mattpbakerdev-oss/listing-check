@@ -65,7 +65,7 @@ Three fields get linear partial credit: title length, description length and pho
 - If the rent or the size is outside the completeness ranges, there is no price check. The app says to fix that field first.
 - In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
 - Why tier is in the chain: on the sample data it cut wrongly flagged clean listings from 28% to 14% against a bedrooms-only chain (BUILD_LOG, 14 Oct 2026). Caveat: the sample generator priced by tier, so tier is bound to look good here. It needs re-checking on real listings, where tier is a judgement call per building.
-- Report the percentage difference. Bands: within 10% is "about right", 10 to 25% is "above/below market", more than 25% is "well above/below market, check for a typo".
+- Report the percentage difference. Bands: within 10% is "about right" in green; 10 to 25% is "a bit above/below similar listings" with no warning colour, because on a few hundred listings a third of fair prices land there; more than 25% is "well above/below market, check for a typo" in red. On the sample, under 3% of fair prices land in the red band.
 - Always show the sample size the benchmark is based on. A benchmark from 4 listings looks different from one from 40.
 - Show the area's typical 1-bed rent next to it as a sanity line.
 
