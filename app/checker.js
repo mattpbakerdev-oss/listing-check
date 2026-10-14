@@ -49,6 +49,10 @@ const formatPts = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 export default function Checker({ reference }) {
   const [draft, setDraft] = useState(EMPTY);
+  // Bumped whenever the whole draft is replaced (Clear, example buttons). The rewrite panel
+  // is keyed on it, so it remounts with no rewrite, no edits and nothing accepted.
+  const [session, setSession] = useState(0);
+  const loadDraft = (d) => { setDraft(d); setSession((s) => s + 1); };
   const result = useMemo(() => scoreListing(draft, reference), [draft, reference]);
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
@@ -76,9 +80,9 @@ export default function Checker({ reference }) {
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-actions">
-            <button type="button" onClick={() => setDraft(EXAMPLE)}>Load an example draft</button>
-            <button type="button" className="quiet" onClick={() => setDraft(MISPRICED)}>Load a mispriced draft</button>
-            <button type="button" className="quiet" onClick={() => setDraft(EMPTY)}>Clear</button>
+            <button type="button" onClick={() => loadDraft(EXAMPLE)}>Load an example draft</button>
+            <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}>Load a mispriced draft</button>
+            <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
           </div>
 
           <Field f={byField.title} gain={gains.title} htmlFor="title">
@@ -191,7 +195,7 @@ export default function Checker({ reference }) {
       </div>
 
       <div className="layout single">
-        <RewritePanel draft={draft} setDraft={setDraft} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
+        <RewritePanel key={session} draft={draft} setDraft={setDraft} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
         <ExportPanel draft={draft} result={result} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 
