@@ -207,3 +207,15 @@ Prices from the platform pricing page: Opus 5 at $5 in and $25 out per million t
 **Verified end to end** on the running dev server with a four-row file: one good row with a blank area and a rent written "35,000", one unknown building, one non-numeric size, one duplicate id. Wrong key: 401. Right key: loaded 1, skipped 3, each with the right reason and row number. The test row was then removed; the sample is back to 400 listings. `next build` clean, 175 tests.
 
 **Next:** step 6, deploy to Vercel.
+
+## 14 Oct 2026, step 6 done: live on Vercel
+
+**Live at https://listing-check.vercel.app**
+
+**How it was deployed.** Vercel CLI installed as a dev dependency (the global npm cache had a permissions fault, so it went in with a scratch cache). Matt logged in from a terminal; the browser login does not work from inside the Claude Code shell, same as Supabase's. `vercel link` to a project named listing-check, four production env vars added from `.env.local` by piping each value into `vercel env add` so nothing was typed or printed: the Supabase URL and anon key, the service role key for the import route, and the import key. The CLI refused the anon key at first because it looks like a secret; it went in as a plain config value, which is what a NEXT_PUBLIC_ key is. Then `vercel --prod`.
+
+**Verified on the live URL.** The page serves the form, the banner, all 67 buildings and 12 areas in the datalists, and the price check, rewrite and export sections. `/import` serves. The import route returns 401 for a wrong key and, with the right key, loaded 1 of a 4-row test file and skipped 3 with the right row numbers and reasons; the test row was then removed. The rewrite edge function answers a call carrying the live site's origin with Sonnet 5.5 and no added facts. Tests 175 of 175, build clean.
+
+**Two things the housekeeping turned up.** `vercel link` appends `.vercel` and `.env*` to `.gitignore`; the second pattern would have covered the tracked `.env.example`, so it came out again. And deployment-specific URLs (listing-check-xxxx-mattpdev.vercel.app) sit behind Vercel's deployment protection and redirect to a login; the production alias is the one to share.
+
+**Still to do from the build order:** record the 60-second walkthrough and write up the metric. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.
