@@ -19,7 +19,9 @@ import { factCheck, type ListingInput } from "../_shared/factcheck.ts";
 
 // Default model, and the models a caller may ask for instead (used by scripts/rewrite-sample.mjs
 // to compare). Anything else falls back to the default.
-const DEFAULT_MODEL = "claude-opus-5";
+// Sonnet 5.5 chosen on 14 Oct 2026: on 20 sample listings it added nothing not in the input
+// (Opus 5 added one fact) and answered in a median 6.0 s against 9.2 s. See BUILD_LOG.
+const DEFAULT_MODEL = "claude-sonnet-5-5";
 const ALLOWED_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-sonnet-5-5", "claude-haiku-4-5"];
 
 const CORS = {
@@ -103,12 +105,7 @@ Deno.serve(async (req) => {
   for (const [k, v] of Object.entries(listing)) if (v !== null && v !== undefined && String(v).trim() !== "") draft[k] = v;
   const payload = { draft, building };
 
-  // A key that is not scoped to a workspace must name one on every request.
-  const workspaceId = Deno.env.get("ANTHROPIC_WORKSPACE_ID");
-  const anthropic = new Anthropic({
-    apiKey,
-    defaultHeaders: workspaceId ? { "anthropic-workspace-id": workspaceId } : undefined,
-  });
+  const anthropic = new Anthropic({ apiKey });
   let response;
   try {
     response = await anthropic.messages.parse({

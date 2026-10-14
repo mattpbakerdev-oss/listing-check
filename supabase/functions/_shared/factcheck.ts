@@ -97,6 +97,13 @@ const CONCEPTS: { id: string; en: string[]; th: string[] }[] = [
   { id: "appliances", en: ["television", "tv", "fridge", "refrigerator", "water heater"], th: ["ทีวี", "ตู้เย็น", "เครื่องทำน้ำอุ่น"] },
 ];
 
+// A view of something implies the thing exists: "pool view" in the draft allows "the pool" in the rewrite.
+const IMPLIES: Record<string, string[]> = {
+  "pool view": ["pool"],
+  "garden view": ["garden"],
+  "river view": ["river view"],
+};
+
 const THAI_DIGITS = "๐๑๒๓๔๕๖๗๘๙";
 const toAsciiDigits = (s: string) => s.replace(/[๐-๙]/g, (d) => String(THAI_DIGITS.indexOf(d)));
 
@@ -146,6 +153,7 @@ export function factCheck(rewrite: Partial<Rewrite>, listing: ListingInput, buil
     for (const n of extractNumbers(str(v))) allowedNumbers.add(n);
   }
   const allowedConcepts = new Set(findConcepts(inputText).map((h) => h.concept));
+  for (const c of [...allowedConcepts]) for (const implied of IMPLIES[c] ?? []) allowedConcepts.add(implied);
 
   const flagged = { title_en: [], description_en: [], title_th: [], description_th: [] } as Record<OutputField, string[]>;
   const factsAdded: string[] = [];

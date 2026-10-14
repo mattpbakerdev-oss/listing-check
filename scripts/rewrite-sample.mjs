@@ -21,9 +21,10 @@ const N_FLAWED = 10;
 const modelArg = process.argv.indexOf("--model");
 const MODEL = modelArg > -1 ? process.argv[modelArg + 1] : undefined;
 
-// USD per million tokens, Anthropic first-party rates (claude-api skill table, 24 Jun 2026).
+// USD per million tokens, Anthropic first-party rates (platform.claude.com pricing page, 14 Oct 2026).
 const PRICE = {
   "claude-opus-5": { in: 5, out: 25 },
+  "claude-sonnet-5-5": { in: 2, out: 10 },
   "claude-sonnet-5": { in: 2, out: 10 },
   "claude-haiku-4-5": { in: 1, out: 5 },
 };

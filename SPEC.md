@@ -125,3 +125,4 @@ Row-level security: the anon key can read `areas`, `buildings`, `listings` and t
 - Thai-first drafts with an English rewrite, since many agents write Thai first.
 - Tighten the benchmark population: exclude "let" listings older than some cutoff, and exclude the listing being checked from its own benchmark. v1 includes both.
 - Fuzzy building matching once the aliases list shows which misspellings are common.
+- Rate-limit the rewrite function. Anyone holding the anon key can call it today, and each call costs model tokens.

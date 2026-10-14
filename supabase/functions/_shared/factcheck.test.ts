@@ -94,6 +94,21 @@ describe("factCheck flags amenities and features not in the input", () => {
     const r = factCheck({ ...clean, title_en: "Pet-friendly 1-bed with Bathtub at The Met, 45 sqm" }, listing, building);
     assert.deepEqual(r.flagged.title_en, ["pet-friendly", "bathtub"]);
   });
+  test("a view of something implies the thing: 'pool view' in the draft allows 'looks out over the pool' and 'วิวสระว่ายน้ำ'", () => {
+    const withPoolView = { ...listing, description: listing.description.replace("city view", "pool view") };
+    const r = factCheck({
+      ...clean,
+      description_en: clean.description_en.replace("unblocked city view", "view over the pool"),
+      description_th: clean.description_th.replace("วิวเมืองไม่บล็อก", "วิวสระว่ายน้ำ"),
+    }, withPoolView, building);
+    assert.deepEqual(r.flagged.description_en, []);
+    assert.deepEqual(r.flagged.description_th, []);
+  });
+  test("but a pool view in the draft does not allow a gym", () => {
+    const withPoolView = { ...listing, description: listing.description.replace("city view", "pool view") };
+    const r = factCheck({ ...clean, description_en: clean.description_en.replace("unblocked city view", "view over the pool") + " There is a gym." }, withPoolView, building);
+    assert.deepEqual(r.flagged.description_en, ["gym"]);
+  });
   test("a view type not in the input is flagged, the input's view type is not", () => {
     const r = factCheck({ ...clean, description_en: clean.description_en.replace("city view", "river view") }, listing, building);
     assert.deepEqual(r.flagged.description_en, ["river view"]);

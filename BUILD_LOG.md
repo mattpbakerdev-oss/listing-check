@@ -163,4 +163,31 @@ Distribution: 145 at 100, 130 in the 90s, 95 in the 80s, 30 in the 70s. So the m
 
 Tests: 129 of 129. `next build` clean. `npm run check` all pass with the minimum of 8.
 
-**Next:** step 4, the AI rewrite edge function with guardrails and the log.
+**Follow-up, same day: softer price bands.** With the minimum of 8, 31% of fair prices were still being questioned, and the building basis never fires on the sample, so every demo listing is compared with its area and tier. Matt's third option: keep the minimum, soften the tone. Within 10% is "about right" in green. 10 to 25% is "a bit above/below similar listings" with no warning colour and a line saying a difference that size is worth a look, not an alarm. Only over 25% is red and says "check for a typo". The bar for shipping it was under 10% of fair prices in red. Measured self-excluded: 3 of 112 clean listings, 3%. Shipped, and the check script now gates on it.
+
+## 14 Oct 2026, step 4 done: AI rewrite with guardrails and the log
+
+**What was built.** A Supabase edge function, `rewrite`, deployed with `--use-api` so no Docker. It sends the agent's filled-in fields and the building record (name, area, station, walking minutes, year completed) as JSON to the model with a structured-output schema: English title and description, Thai title and description, and a `facts_used` list. The model key sits in Supabase secrets. After the response, `_shared/factcheck.ts` checks every number and every amenity or feature word in the four outputs against the input and the building record. Features are matched by concept with English and Thai synonyms, so a balcony in the Thai draft is allowed in the English rewrite. Anything not in the input comes back flagged per field. Every prompt and response is written to `rewrite_log` with the model, usage and the `facts_added` list, and the agent's accept click is recorded on the same row. 17 tests on the checker, 146 in total.
+
+**In the UI.** A "Rewrite with AI" section below the form. For each of the four fields: the draft and the rewrite side by side, flagged words highlighted, an edit box prefilled with the rewrite, and an accept button. While a flagged word is still in the edit box the button stays off until the agent ticks "I have checked it is true". Nothing is applied until accept. An accepted Thai title appears in the form so the export in step 5 can carry it.
+
+**Twenty sample listings through two models.** Ten clean and ten flawed, the same twenty for both, sent as the form would send them.
+
+| | Claude Opus 5 | Claude Sonnet 5.5 |
+|---|---|---|
+| Rewrites that added a fact not in the input | 1 of 20 | 0 of 20 |
+| Time per call, median | 9.2 s | 6.0 s |
+| Time per call, mean and max | 9.4 s, 12.1 s | 6.3 s, 11.5 s |
+| Tokens per call, mean | 1,156 in, 665 out | 1,158 in, 585 out |
+| Cost per call | $0.022 | $0.008 |
+| Cost for 20 | $0.45 | $0.16 |
+
+Prices from the platform pricing page: Opus 5 at $5 in and $25 out per million tokens, Sonnet 5.5 at $2 and $10. Matt's first ask was "Sonnet 5.5"; that model name exists and the API accepted it, so that is what ran. **Sonnet 5.5 is now the default.** It was as clean, a third faster, and a third of the price.
+
+**The one real addition, and the checker's own mistake.** At run time the checker flagged 5 of the 20 Opus rewrites. Four of those were the checker's fault: the drafts said "pool view" and the model wrote "looks out over the pool" or "วิวสระว่ายน้ำ", which the concept matcher treated as a new "pool" claim. The checker now treats a view of something as evidence the thing exists. Re-scoring the logged outputs with the fixed checker, without calling the model again, gives the 1 of 20 in the table. That one is genuine: listing L0011 has no furnishing level (its generated description says only "furnished") and Opus wrote "fully furnished" and "ตกแต่งครบ" in both languages. That is exactly the failure the spec expected, a plausible upgrade of a vague fact, and the guardrail caught it. Sonnet wrote "furnished" and left it there. The log rows keep the `facts_added` list from the checker that was live at the time, so the first Opus rows say 5; the re-scored number is the one to quote.
+
+**Not caught by design.** Both models add "minimum one-year contract, two-month deposit" when the draft says so and leave it out when it does not. Neither invented a view, a distance or a walking time in 40 rewrites. The checker only knows the amenity words in its list; a novel invention outside the list would get through. The list is in one place and easy to extend as the log shows what models actually add.
+
+**Things that went wrong.** The first model key was not scoped to a workspace and the API refused every call until Matt replaced it. The slowest Sonnet call (L0001 at 11.5 s) landed while the function was being redeployed with the checker fix; the median is the number to trust. The rewrite function is callable by anyone holding the anon key, at model cost; rate limiting is on the "next" list.
+
+**Next:** step 5, export and CSV import.
