@@ -118,6 +118,26 @@ textarea[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-seri
 .bench-facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .bench .hint { margin-top: 0.625rem; }
 
+/* AI rewrite */
+.layout.single { grid-template-columns: 1fr; padding-top: 0; }
+.rewrite { border-top: 1px solid var(--rule); padding-top: 1.5rem; display: grid; gap: 1.25rem; }
+.rewrite-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.rewrite-head h2 { margin: 0; }
+.to-rewrite { font-size: 0.9375rem; }
+.rewrite-warning { padding: 0.65rem 0.85rem; background: var(--warn-soft); border-left: 3px solid var(--warn); border-radius: 0 6px 6px 0; }
+.rw-field { display: grid; gap: 0.5rem; padding: 1rem 0; border-top: 1px solid var(--rule); }
+.rw-field h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.rw-compare { display: grid; gap: 0.75rem; }
+@media (min-width: 700px) { .rw-compare { grid-template-columns: 1fr 1fr; gap: 1.5rem; } }
+.rw-caption { font-size: 0.8125rem; color: var(--muted); }
+.rw-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.rw-text[lang="th"], .rewrite textarea[lang="th"], input[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-serif; }
+mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid var(--warn); padding: 0 0.1em; }
+.rw-confirm { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.9375rem; color: var(--warn); }
+.rw-confirm input { width: auto; min-height: 0; margin-top: 0.25rem; }
+.rw-actions { display: flex; gap: 0.5rem; }
+button:disabled { opacity: 0.45; cursor: default; }
+
 /* fixed score strip on phones */
 .bottombar {
   position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 0.75rem;

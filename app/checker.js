@@ -5,9 +5,10 @@ import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
+import RewritePanel from "./rewrite.js";
 
 const EMPTY = {
-  title: "", description: "", description_th: "", building: "", area: "", size_sqm: "", floor: "",
+  title: "", description: "", description_th: "", title_th: "", building: "", area: "", size_sqm: "", floor: "",
   bedrooms: "", bathrooms: "", monthly_rent_thb: "", furnishing: "", photo_count: "", nearest_station: "",
 };
 
@@ -93,6 +94,13 @@ export default function Checker({ reference }) {
             {draft.description_th.trim() ? <p className="hint">Thai description added. It will be used for the rewrite.</p> : null}
           </div>
 
+          {draft.title_th ? (
+            <div className="field">
+              <label htmlFor="title_th" className="label">Thai title <span className="optional">from the rewrite</span></label>
+              <input id="title_th" lang="th" value={draft.title_th} onChange={set("title_th")} />
+            </div>
+          ) : null}
+
           <div className="row">
             <Field f={byField.building} gain={gains.building} htmlFor="building">
               <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -176,7 +184,13 @@ export default function Checker({ reference }) {
             <h2>Price check</h2>
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
           </section>
+
+          <p className="to-rewrite"><a href="#rewrite">Rewrite with AI</a>, below the form.</p>
         </aside>
+      </div>
+
+      <div className="layout single">
+        <RewritePanel draft={draft} setDraft={setDraft} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
       </div>
 
       <a className="bottombar" href="#results" onClick={jumpToResults}>

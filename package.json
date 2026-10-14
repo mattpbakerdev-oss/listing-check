@@ -7,9 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test \"lib/**/*.test.js\"",
+    "test": "node --test \"lib/**/*.test.js\" \"supabase/functions/**/*.test.ts\"",
     "seed": "node --env-file=.env.local scripts/seed.mjs",
-    "check": "node --env-file=.env.local scripts/check-benchmark.mjs"
+    "check": "node --env-file=.env.local scripts/check-benchmark.mjs",
+    "rewrite-sample": "node --env-file=.env.local scripts/rewrite-sample.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
