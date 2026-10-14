@@ -80,7 +80,7 @@ This is the part most likely to go wrong, so the rules come first.
 - After the response, the app checks every number and every amenity word in the rewrite against the input. Anything not in the input is highlighted as "added by AI, check this" and the agent has to remove or confirm it.
 - The agent sees the original and the rewrite side by side. The rewrite is never applied automatically.
 - Every prompt and response is logged to a `rewrite_log` table with the listing id, so I can see how often the model adds things. That number goes in the build log.
-- The rewrite is rate-limited in the edge function: 20 per IP in any hour, 300 in total in any 24 hours, counted from `rewrite_log`. Over the limit, the agent sees a plain message saying so and when to try again.
+- The rewrite is rate-limited in the edge function: 60 per IP in any hour (an office shares an IP), 300 in total in any 24 hours, counted from `rewrite_log`. Over the limit, the agent sees a plain message saying so and when to try again.
 
 Expected failure to document: the model inventing a "pool and gym" or a "5 minutes to BTS" that wasn't in the draft. The guardrail above is the fix, and the log is the evidence.
 

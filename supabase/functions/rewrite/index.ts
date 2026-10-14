@@ -25,7 +25,8 @@ const DEFAULT_MODEL = "claude-sonnet-5-5";
 const ALLOWED_MODELS = ["claude-opus-5", "claude-sonnet-5", "claude-sonnet-5-5", "claude-haiku-4-5"];
 
 // Rate limits, counted from rewrite_log. Per IP per rolling hour, and in total per rolling 24 hours.
-const PER_IP_PER_HOUR = 20;
+// 60 per IP because an office shares one.
+const PER_IP_PER_HOUR = 60;
 const TOTAL_PER_DAY = 300;
 
 const CORS = {
