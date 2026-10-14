@@ -4,12 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "node --test \"lib/**/*.test.js\"",
     "seed": "node --env-file=.env.local scripts/seed.mjs",
     "check": "node --env-file=.env.local scripts/check-benchmark.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",
-    "csv-parse": "^7.0.3"
+    "csv-parse": "^7.0.3",
+    "next": "^16.4.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }

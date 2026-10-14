@@ -123,3 +123,17 @@ The honest row is the one to quote. The benchmark catches almost every mispriced
 Distribution: 145 at 100, 130 in the 90s, 95 in the 80s, 30 in the 70s. So the metric's "before" number is 79.6 across 71 flagged listings. Even three flaws rarely drop a listing below 70, because most flaws cost 5 to 10 points and the generator never blanks the big-ticket fields (building, area, bedrooms) or the station. That is a fair model of a sloppy-but-not-empty draft. Points lost across the sample, largest first: description 610, size 520, photos 494, floor 384.
 
 **Unit tests** still 102 of 102.
+
+## 14 Oct 2026, step 3 done: the one screen
+
+**What was built.** A Next.js 16 app at the repo root, one page. The server component loads areas and buildings with the anon key and hands them to a client component. Scoring runs in the browser with the pure function from step 2 on every keystroke. The benchmark calls `benchmark_listing` through the anon key, debounced 350 ms, ignoring stale responses, and only once there is a rent, a size and a known building or area. No AI rewrite yet.
+
+**Design choices, kept plain as asked.** One typeface family, IBM Plex Sans with its Thai companion, because drafts are bilingual. White page, navy ink, and green, amber and red used only to mean ok, partial and wrong. The one element with any personality is the score bar: twelve segments, each as wide as the points its field is worth, filled by what the draft earned, so the bar itself shows where the points went. Each field also shows its own message underneath the input, and the results panel lists the fields to fix as links that jump to the input. On a phone it is one column with a fixed strip at the bottom showing the score and the price verdict; on a laptop the form is on the left and the results stay put on the right. Building, area and station inputs use datalists, which work as plain text boxes on phones. A "Load an example draft" button fills in a typical rushed listing for the demo.
+
+**Benchmark wording** lives in `lib/benchmark/bands.js` with 19 tests: the three bands from section 6, and a sentence saying which comparables the median came from, such as "studios in luxury buildings in Phrom Phong". Fewer than 8 comparables adds "treat this as a rough guide".
+
+**Verified.** `next build` compiles clean. `npm test` is 121 of 121. The server-rendered page contains the form, the banner, and all 67 buildings and 12 areas in the datalists, with no errors in the dev log. The browser extension was not connected in this session, so the interactive behaviour (typing, score updating, benchmark call) was not exercised in a real browser by me. Matt should click through once before trusting it.
+
+**To run it locally:** `npm run dev`, then open http://localhost:3000. Needs `.env.local` with the Supabase URL and anon key.
+
+**Next:** step 4, the AI rewrite edge function with guardrails and the log.
