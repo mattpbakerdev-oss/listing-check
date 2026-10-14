@@ -7,6 +7,7 @@ import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
+import { lineFor } from "../lib/stations.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 
@@ -62,22 +63,40 @@ export default function Checker({ reference }) {
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
   const gains = useGains(result);
+  const compact = useCompactHeader();
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }));
   const problems = result.fields.filter((f) => f.status !== "ok");
   const verdict = bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? band(bench.data.pct_diff) : null;
+  const matchedBuilding = result.matched.building_id ? reference.buildings.find((b) => b.building_id === result.matched.building_id) : null;
 
+  // Scroll so the results sit just under the sticky header. The header is 58px once compact,
+  // which it will be by the time the scroll lands, so use that rather than its current height.
   const jumpToResults = (e) => {
     e.preventDefault();
+    const el = document.getElementById("results");
+    if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById("results")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    const headerNow = document.querySelector("header.top")?.getBoundingClientRect().height ?? 0;
+    const offset = (compact ? headerNow : 58) + 8;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: reduce ? "auto" : "smooth" });
   };
 
   return (
     <>
-      <header className="top">
+      <header className={`top${compact ? " compact" : ""}`}>
         <div className="top-inner">
-          <h1>Listing Check</h1>
+          <div className="top-row">
+            <h1>Listing Check</h1>
+            <a className="top-score" href="#results" onClick={jumpToResults} aria-label={`Score ${result.score} of 100. Jump to the results.`}>
+              <ScoreRing score={result.score} small />
+              {gains.total ? <span className="gain" key={gains.total.key} aria-live="polite">+{gains.total.amount}</span> : null}
+              <span className="top-score-text">
+                {problems.length === 0 ? "complete" : `${problems.length} to fix`}
+                {verdict ? ` · ${shortVerdict(verdict)}` : ""}
+              </span>
+            </a>
+          </div>
           <p className="purpose">Check a Bangkok rental listing before it goes live: what is missing, and whether the price makes sense.</p>
           <p className="notice">
             Running on sample data generated from public market averages. <a href="/import">Import your listings</a> to run it on your own.
@@ -217,6 +236,8 @@ export default function Checker({ reference }) {
             )}
           </section>
 
+          <BuildingCard building={matchedBuilding} />
+
           <section className="bench">
             <h2>Price check</h2>
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
@@ -231,14 +252,6 @@ export default function Checker({ reference }) {
         <ExportPanel draft={draft} result={result} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 
-      <a className="bottombar" href="#results" onClick={jumpToResults}>
-        <span className="bb-score">{result.score}</span>
-        {gains.total ? <span className="gain bb-gain" key={gains.total.key} aria-live="polite">+{gains.total.amount}</span> : null}
-        <span className="bb-text">
-          {problems.length === 0 ? "complete" : `${problems.length} to fix`}
-          {verdict ? ` · ${shortVerdict(verdict)}` : ""}
-        </span>
-      </a>
     </>
   );
 }
@@ -246,11 +259,14 @@ export default function Checker({ reference }) {
 function Field({ f, gain, htmlFor, children, hint, labelOverride }) {
   return (
     <div className="field" data-status={f.status}>
-      <label htmlFor={htmlFor} className="label">{labelOverride ?? f.label}</label>
+      {/* The gain flash lives in the label, which is always there, so it never changes the layout. */}
+      <label htmlFor={htmlFor} className="label">
+        {labelOverride ?? f.label}
+        {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
+      </label>
       {children}
       <p className={f.status !== "ok" && f.message ? "fieldmsg" : "hint"}>
         {f.status !== "ok" && f.message ? f.message : f.status === "ok" && f.message ? f.message : hint ?? ""}
-        {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
       </p>
     </div>
   );
@@ -260,16 +276,63 @@ function Field({ f, gain, htmlFor, children, hint, labelOverride }) {
 export const scoreBand = (s) => (s >= 85 ? "high" : s >= 60 ? "mid" : "low");
 const scoreWord = (s) => (s >= 85 ? "Ready to publish" : s >= 60 ? "Nearly there" : "Needs work");
 
-// A ring that fills by score, with the number inside.
-function ScoreRing({ score }) {
+// What we know about the matched building, from our own tables only. Hidden until a building matches.
+const TIER_WORD = { luxury: "Luxury", mid: "Mid-range", budget: "Budget" };
+
+function BuildingCard({ building }) {
+  if (!building) return null;
+  const line = lineFor(building.nearest_station);
+  const year = building.completed_year;
+  const age = year ? new Date().getFullYear() - year : null;
+  return (
+    <section className="building-card" aria-label={`About ${building.building_name}`}>
+      <h2>{building.building_name}</h2>
+      <p className="building-line">
+        {line?.colour ? <span className="line-dot" style={{ background: line.colour }} aria-hidden="true" /> : null}
+        <span>{building.nearest_station}</span>
+      </p>
+      <p className="building-facts muted">
+        {[line?.name, building.walk_min ? `${building.walk_min} min walk` : null].filter(Boolean).join(" · ")}
+      </p>
+      <p className="building-facts muted">
+        {[
+          year ? `Completed ${year}${age !== null ? ` (${age} year${age === 1 ? "" : "s"} old)` : ""}` : null,
+          building.tier ? TIER_WORD[building.tier] ?? building.tier : null,
+          `${building.listing_count ?? 0} listing${building.listing_count === 1 ? "" : "s"} in our data`,
+        ].filter(Boolean).join(" · ")}
+      </p>
+    </section>
+  );
+}
+
+// The header compresses to one line once the page has scrolled past the intro. Hysteresis so
+// the header shrinking (which shifts the page) cannot flip it straight back.
+function useCompactHeader() {
+  const [compact, setCompact] = useState(false);
+  useEffect(() => {
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      setCompact((c) => (c ? window.scrollY > 24 : window.scrollY > 96));
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+  return compact;
+}
+
+// A ring that fills by score, with the number inside. `small` is the 40px header version.
+function ScoreRing({ score, small = false }) {
   const r = 48, c = 2 * Math.PI * r;
   return (
-    <svg className="ring" viewBox="0 0 112 112" role="img" aria-label={`Score ${score} of 100`} data-band={scoreBand(score)}>
+    <svg className="ring" viewBox="0 0 112 112" role="img" aria-label={`Score ${score} of 100`} data-band={scoreBand(score)} data-size={small ? "small" : "large"}>
       <circle className="ring-track" cx="56" cy="56" r={r} fill="none" strokeWidth="8" />
       <circle className="ring-fill" cx="56" cy="56" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
         strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} transform="rotate(-90 56 56)" />
-      <text className="ring-number" x="56" y="58" textAnchor="middle" dominantBaseline="middle">{score}</text>
-      <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>
+      <text className="ring-number" x="56" y={small ? "56" : "58"} textAnchor="middle" dominantBaseline="middle">{score}</text>
+      {small ? null : <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>}
     </svg>
   );
 }
