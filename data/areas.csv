@@ -1,0 +1,13 @@
+area_id,area_name,rent_sqm_typical,rent_sqm_low,rent_sqm_high,one_bed_typical,confidence
+thonglor,Thonglor,850,650,1100,32000,direct
+ekkamai,Ekkamai,750,550,950,26000,interpolated
+phrom_phong,Phrom Phong,780,600,1000,33000,direct
+asok_nana,Asok / Nana,700,500,950,28000,direct
+phra_khanong_on_nut,Phra Khanong / On Nut,540,400,720,17000,direct
+ari,Ari,620,450,800,20000,direct
+sathorn,Sathorn / Chong Nonsi,680,500,900,28000,direct
+silom,Silom / Sala Daeng,700,520,950,32000,direct
+ratchathewi,Ratchathewi / Phaya Thai,600,450,800,20000,direct
+rama9,Rama 9 / Phetchaburi,560,420,750,19000,direct
+bang_na,Bang Na / Udom Suk,450,330,600,14000,direct
+lat_phrao,Lat Phrao / Ratchada,500,350,680,16000,direct

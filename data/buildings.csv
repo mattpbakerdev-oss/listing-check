@@ -1,0 +1,68 @@
+building_id,building_name,area_id,nearest_station,walk_min,completed_year,tier
+hq-thonglor,HQ Thonglor,thonglor,BTS Thong Lo,9,2013,luxury
+noble-form-thonglor,Noble Form Thonglor,thonglor,BTS Thong Lo,18,2025,luxury
+laviq-sukhumvit-57,Laviq Sukhumvit 57,thonglor,BTS Thong Lo,7,2019,luxury
+park-origin-thonglor,Park Origin Thonglor,thonglor,BTS Thong Lo,20,2022,mid
+ideo-q-sukhumvit-36,Ideo Q Sukhumvit 36,thonglor,BTS Thong Lo,8,2020,mid
+rhythm-sukhumvit-36-38,Rhythm Sukhumvit 36-38,thonglor,BTS Thong Lo,7,2016,mid
+thonglor-tower,Thonglor Tower,thonglor,BTS Thong Lo,21,1995,budget
+rhythm-ekkamai,Rhythm Ekkamai,ekkamai,BTS Ekkamai,6,2018,mid
+maru-ekkamai-2,Maru Ekkamai 2,ekkamai,BTS Ekkamai,8,2020,luxury
+noble-reveal,Noble Reveal,ekkamai,BTS Ekkamai,7,2011,mid
+xt-ekkamai,XT Ekkamai,ekkamai,BTS Ekkamai,19,2020,mid
+rhythm-ekkamai-estate,Rhythm Ekkamai Estate,ekkamai,BTS Ekkamai,15,2022,mid
+noble-refine,Noble Refine,phrom_phong,BTS Phrom Phong,4,2012,mid
+bright-sukhumvit-24,Bright Sukhumvit 24,phrom_phong,BTS Phrom Phong,10,2009,luxury
+aguston-sukhumvit-22,Aguston Sukhumvit 22,phrom_phong,BTS Phrom Phong,13,2008,luxury
+beverly-33,Beverly 33,phrom_phong,BTS Phrom Phong,9,2012,mid
+the-lumpini-24,The Lumpini 24,phrom_phong,BTS Phrom Phong,12,2016,budget
+condo-one-x-sukhumvit-26,Condo One X Sukhumvit 26,phrom_phong,BTS Phrom Phong,10,2008,budget
+hyde-sukhumvit-13,Hyde Sukhumvit 13,asok_nana,BTS Nana,5,2014,luxury
+ashton-asoke,Ashton Asoke,asok_nana,BTS Asok,6,2017,luxury
+the-esse-asoke,The Esse Asoke,asok_nana,BTS Asok,7,2019,luxury
+edge-sukhumvit-23,Edge Sukhumvit 23,asok_nana,MRT Sukhumvit,4,2016,mid
+the-trendy,The Trendy Condominium,asok_nana,BTS Nana,5,2008,budget
+sukhumvit-suite,Sukhumvit Suite,asok_nana,BTS Nana,9,1993,budget
+sky-walk-residences,Sky Walk Residences,phra_khanong_on_nut,BTS Phra Khanong,4,2012,mid
+le-luk,Le Luk Condominium,phra_khanong_on_nut,BTS Phra Khanong,3,2009,mid
+life-sukhumvit-65,Life @ Sukhumvit 65,phra_khanong_on_nut,BTS Phra Khanong,6,2008,budget
+ideo-verve-sukhumvit,Ideo Verve Sukhumvit,phra_khanong_on_nut,BTS On Nut,1,2011,mid
+ideo-mobi-sukhumvit-81,Ideo Mobi Sukhumvit 81,phra_khanong_on_nut,BTS On Nut,4,2013,budget
+the-base-park-west,The Base Park West Sukhumvit 77,phra_khanong_on_nut,BTS On Nut,15,2015,budget
+noble-around-ari,Noble Around Ari,ari,BTS Ari,6,2023,luxury
+centric-ari-station,Centric Ari Station,ari,BTS Ari,6,2015,mid
+the-vertical-aree,The Vertical Aree,ari,BTS Ari,7,2010,mid
+rhythm-phahol-ari,Rhythm Phahol-Ari,ari,BTS Ari,11,2012,mid
+noble-lite,Noble Lite,ari,BTS Ari,7,2006,budget
+tait-sathorn-12,Tait Sathorn 12,sathorn,BTS Saint Louis,3,2023,luxury
+the-met,The Met,sathorn,BTS Chong Nonsi,10,2008,luxury
+the-address-sathorn,The Address Sathorn,sathorn,BTS Chong Nonsi,3,2011,mid
+knightsbridge-prime-sathorn,Knightsbridge Prime Sathorn,sathorn,BTS Chong Nonsi,11,2019,mid
+collezio-sathorn-pipat,Collezio Sathorn-Pipat,sathorn,BTS Chong Nonsi,7,2010,mid
+st-louis-grand-terrace,St. Louis Grand Terrace,sathorn,BTS Saint Louis,8,2006,budget
+saladaeng-one,Saladaeng One,silom,BTS Sala Daeng,9,2018,luxury
+the-lofts-silom,The Lofts Silom,silom,BTS Surasak,7,2020,mid
+klass-silom,Klass Silom,silom,BTS Sala Daeng,8,2013,mid
+quad-silom,Quad Silom,silom,BTS Chong Nonsi,5,2009,mid
+noble-revo-silom,Noble Revo Silom,silom,BTS Surasak,10,2015,budget
+the-treasure-silom,The Treasure Silom,silom,BTS Chong Nonsi,10,2008,budget
+park-origin-ratchathewi,Park Origin Ratchathewi,ratchathewi,BTS Ratchathewi,8,2022,luxury
+rhythm-rangnam,Rhythm Rangnam,ratchathewi,BTS Victory Monument,3,2018,mid
+xt-phayathai,XT Phayathai,ratchathewi,BTS Phaya Thai,9,2022,mid
+ideo-mobi-rangnam,Ideo Mobi Rangnam,ratchathewi,BTS Victory Monument,9,2020,mid
+condolette-ize-ratchathewi,Condolette Ize Ratchathewi,ratchathewi,BTS Ratchathewi,4,2014,budget
+ashton-asoke-rama-9,Ashton Asoke - Rama 9,rama9,MRT Phra Ram 9,4,2020,luxury
+life-asoke-rama-9,Life Asoke Rama 9,rama9,MRT Phra Ram 9,9,2020,mid
+belle-grand-rama-9,Belle Grand Rama 9,rama9,MRT Phra Ram 9,10,2015,mid
+chewathai-residence-asoke,Chewathai Residence Asoke,rama9,MRT Phetchaburi,6,2016,mid
+aspire-rama-9,Aspire Rama 9,rama9,MRT Phra Ram 9,7,2013,budget
+ideo-mobi-sukhumvit-east-point,Ideo Mobi Sukhumvit East Point,bang_na,BTS Bang Na,5,2020,mid
+the-coast-bangkok,The Coast Bangkok,bang_na,BTS Bang Na,6,2011,mid
+ideo-blucove-sukhumvit,Ideo Blucove Sukhumvit,bang_na,BTS Udom Suk,4,2011,mid
+whizdom-connect-sukhumvit,Whizdom Connect Sukhumvit,bang_na,BTS Punnawithi,10,2020,mid
+elio-del-nest,Elio Del Nest,bang_na,BTS Udom Suk,10,2020,budget
+the-crest-park-residences,The Crest Park Residences,lat_phrao,MRT Phahon Yothin,2,2022,luxury
+life-ladprao,Life Ladprao,lat_phrao,BTS Ha Yaek Lat Phrao,2,2020,mid
+the-saint-residences,The Saint Residences,lat_phrao,MRT Phahon Yothin,7,2017,mid
+rhythm-ratchada-huai-khwang,Rhythm Ratchada - Huai Khwang,lat_phrao,MRT Huai Khwang,1,2011,mid
+life-ratchadapisek,Life Ratchadapisek,lat_phrao,MRT Huai Khwang,7,2013,budget
