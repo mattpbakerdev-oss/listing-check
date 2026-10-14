@@ -20,6 +20,8 @@ Not for: tenants, landlords, admin staff. One user type only.
 
 (The first draft of this metric assumed raw drafts averaged around 55. That was a guess, and the first sample data averaged 98. See the build log, 14 Oct 2026.)
 
+**Result, measured 14 Oct 2026 with `npm run metric`.** Of 400 sample listings, 71 score under 85 on first pass, with a mean of 79.6. Simulating an agent who accepts every suggested fix (sensible values for missing floor, bathrooms, furnishing, photos and size; the AI rewrite for the title and description, generated after those fixes) brings the mean to 98.0, and all 71 reach 85 or more. The rewrites cost $0.68 for 71 calls and none added a fact that was not in the input. The simulation does not touch the rent, so the two listings whose rent is a typo still carry that fault; they pass on the other fields.
+
 **Secondary metric:** share of listings flagged as mispriced (more than 10% above or below the benchmark, the edge of the "about right" band in section 6) that the agent reprices before publishing. Measured on the sample set in the demo.
 
 **What I'm not measuring yet:** real enquiry rates. That needs production data and belongs in the "next" section.

@@ -237,4 +237,20 @@ What changed:
 
 What went wrong: the first screenshot showed the phone score strip on the desktop too. The rewritten stylesheet declared the strip after the media query that hides it, so the later rule won. Moved the hide rule to the end. The "N" badge top right in the screenshots is the Next.js dev indicator and is not in production.
 
-**Still to do from the build order:** record the 60-second walkthrough and write up the metric. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.
+**5. The metric.** `npm run metric` (scripts/metric.mjs) takes every sample listing scoring under 85, applies the fixes an agent would accept, and re-scores. Structured gaps get a sensible value: floor 10, bathrooms 1, furnishing "fully furnished", photos 8, and size from the median of same-bedroom listings in the same building, else the same area. Then the title and description take the AI rewrite, generated from the draft after those fixes so the model can mention the floor it now has. Logged rewrites are reused only when the logged draft matches the fixed draft.
+
+| | |
+|---|---|
+| Sample listings | 400 |
+| Flagged, under 85 on first pass | 71 |
+| Mean before | 79.6 |
+| Mean after accepting every fix | 98.0 |
+| Reach 85 or more | 71 of 71 |
+| Rewrite calls | 71 (55 fresh, 16 reused from the log), $0.68 |
+| Fresh rewrites that added a fact not in the input | 0 of 55 |
+
+Two notes on what the number means. First, the structured fixes do most of the work: a run where the rewrite failed for 55 of the 71 (see below) still reached a mean of 92.9 and 69 of 71 over 85 on the structured fixes alone. The rewrite is what takes the thin descriptions from 4 out of 15 to 15, and the caps titles to 10. Second, the simulation never touches the rent, because "a sensible value" for a rent is a judgement the agent makes with the price check in front of them. The two listings whose rent is a typo (L0161, L0195) keep that fault and pass on everything else.
+
+What went wrong, in order. The first metric run hit the rewrite rate limit after 16 fresh calls: the service-role bypass compared the Authorization header with the key from the function's environment and they did not match in the edge runtime. Replaced with a check of the role claim in the already-verified JWT, which is the right way round anyway. Confirmed anon still gets a 429 while this IP is over its hour while the service role gets a 200. The second run reused the 16 logged rewrites by comparing the logged draft with the fixed draft, so they were not paid for twice.
+
+**Still to do from the build order:** record the 60-second walkthrough. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.

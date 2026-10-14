@@ -62,6 +62,20 @@ Rules:
 const RECENT_BUILDING_YEARS = 5;
 
 const norm = (s: unknown) => String(s ?? "").trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
+
+// The gateway has already verified the JWT's signature (verify_jwt is on), so reading the
+// role claim from the payload is enough to tell the service role key from the anon key.
+function jwtRole(authorization: string | null): string | null {
+  const token = authorization?.replace(/^Bearer\s+/i, "");
+  const payload = token?.split(".")[1];
+  if (!payload) return null;
+  try {
+    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(payload.length / 4) * 4, "="));
+    return JSON.parse(json).role ?? null;
+  } catch {
+    return null;
+  }
+}
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
@@ -91,20 +105,24 @@ Deno.serve(async (req) => {
   const listingId = typeof body.listing_id === "string" ? body.listing_id : null;
   const model = ALLOWED_MODELS.includes(String(body.model)) ? String(body.model) : DEFAULT_MODEL;
 
-  // Rate limit before spending any model tokens.
+  // Rate limit before spending any model tokens. Calls made with the service role key
+  // (our own scripts, never the browser) are not limited.
   const clientIp = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const [perIp, total] = await Promise.all([
-    supabase.from("rewrite_log").select("id", { count: "exact", head: true }).eq("client_ip", clientIp).gte("created_at", hourAgo),
-    supabase.from("rewrite_log").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
-  ]);
-  if (perIp.error || total.error) return json({ error: "Could not check the rewrite limit. Try again in a moment." }, 500);
-  if ((total.count ?? 0) >= TOTAL_PER_DAY) {
-    return json({ error: `The rewrite has reached its daily limit of ${TOTAL_PER_DAY}. It resets over the next 24 hours.` }, 429);
-  }
-  if ((perIp.count ?? 0) >= PER_IP_PER_HOUR) {
-    return json({ error: `You have used ${PER_IP_PER_HOUR} rewrites in the last hour, which is the limit. Try again a bit later.` }, 429);
+  const isServiceRole = jwtRole(req.headers.get("authorization")) === "service_role";
+  if (!isServiceRole) {
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const [perIp, total] = await Promise.all([
+      supabase.from("rewrite_log").select("id", { count: "exact", head: true }).eq("client_ip", clientIp).gte("created_at", hourAgo),
+      supabase.from("rewrite_log").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
+    ]);
+    if (perIp.error || total.error) return json({ error: "Could not check the rewrite limit. Try again in a moment." }, 500);
+    if ((total.count ?? 0) >= TOTAL_PER_DAY) {
+      return json({ error: `The rewrite has reached its daily limit of ${TOTAL_PER_DAY}. It resets over the next 24 hours.` }, 429);
+    }
+    if ((perIp.count ?? 0) >= PER_IP_PER_HOUR) {
+      return json({ error: `You have used ${PER_IP_PER_HOUR} rewrites in the last hour, which is the limit. Try again a bit later.` }, 429);
+    }
   }
 
   // Resolve the building the same way the completeness checker does: case-insensitive name or alias.
