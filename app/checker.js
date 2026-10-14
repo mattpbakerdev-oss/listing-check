@@ -71,10 +71,13 @@ export default function Checker({ reference }) {
   return (
     <>
       <header className="top">
-        <h1>Listing check</h1>
-        <p className="banner">
-          Sample data generated from public market averages. <a href="/import">Import your listings</a> and it runs on real data.
-        </p>
+        <div className="top-inner">
+          <h1>Listing Check</h1>
+          <p className="purpose">Check a Bangkok rental listing before it goes live: what is missing, and whether the price makes sense.</p>
+          <p className="notice">
+            Running on sample data generated from public market averages. <a href="/import">Import your listings</a> to run it on your own.
+          </p>
+        </div>
       </header>
 
       <div className="layout">
@@ -85,78 +88,87 @@ export default function Checker({ reference }) {
             <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
           </div>
 
-          <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
-            <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
-          </Field>
+          <fieldset>
+            <legend>The listing</legend>
+            <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
+              <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
+            </Field>
 
-          <Field f={byField.description} gain={gains.fields.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
-            <textarea id="description" rows={5} value={draft.description} onChange={set("description")} />
-          </Field>
+            <Field f={byField.description} gain={gains.fields.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
+              <textarea id="description" rows={5} value={draft.description} onChange={set("description")} />
+            </Field>
 
-          <div className="field">
-            <label htmlFor="description_th" className="label">Thai description <span className="optional">optional</span></label>
-            <textarea id="description_th" lang="th" rows={3} value={draft.description_th} onChange={set("description_th")} />
-            {draft.description_th.trim() ? <p className="hint">Thai description added. It will be used for the rewrite.</p> : null}
-          </div>
-
-          {draft.title_th ? (
             <div className="field">
-              <label htmlFor="title_th" className="label">Thai title <span className="optional">from the rewrite</span></label>
-              <input id="title_th" lang="th" value={draft.title_th} onChange={set("title_th")} />
+              <label htmlFor="description_th" className="label">Thai description <span className="optional">optional</span></label>
+              <textarea id="description_th" lang="th" rows={3} value={draft.description_th} onChange={set("description_th")} />
+              {draft.description_th.trim() ? <p className="hint">Thai description added. It will be used for the rewrite.</p> : null}
             </div>
-          ) : null}
 
-          <div className="row">
-            <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
-              <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
-            </Field>
-            <Field f={byField.area} gain={gains.fields.area} htmlFor="area">
-              <input id="area" list="areas" value={draft.area} onChange={set("area")} autoComplete="off" />
-            </Field>
-          </div>
+            {draft.title_th ? (
+              <div className="field">
+                <label htmlFor="title_th" className="label">Thai title <span className="optional">from the rewrite</span></label>
+                <input id="title_th" lang="th" value={draft.title_th} onChange={set("title_th")} />
+              </div>
+            ) : null}
+          </fieldset>
 
-          <div className="row three">
-            <Field f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
-              <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
-            </Field>
-            <Field f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
-              <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
-            </Field>
-            <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
-              <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
-            </Field>
-          </div>
+          <fieldset>
+            <legend>The unit</legend>
+            <div className="row">
+              <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
+                <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
+              </Field>
+              <Field f={byField.area} gain={gains.fields.area} htmlFor="area">
+                <input id="area" list="areas" value={draft.area} onChange={set("area")} autoComplete="off" />
+              </Field>
+            </div>
 
-          <div className="row three">
-            <Field f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
-              <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
-                <option value="">Choose</option>
-                <option value="0">Studio</option>
-                {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </Field>
-            <Field f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
-              <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
-            </Field>
-            <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count">
-              <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
-            </Field>
-          </div>
+            <div className="row three">
+              <Field f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
+                <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
+              </Field>
+              <Field f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
+                <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
+              </Field>
+              <Field f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
+                <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
+                  <option value="">Choose</option>
+                  <option value="0">Studio</option>
+                  {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </Field>
+            </div>
 
-          <div className="row">
-            <Field f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
-              <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
-                <option value="">Choose</option>
-                <option value="unfurnished">Unfurnished</option>
-                <option value="partly furnished">Partly furnished</option>
-                <option value="fully furnished">Fully furnished</option>
-              </select>
-            </Field>
-            <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station">
-              <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
-                placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
-            </Field>
-          </div>
+            <div className="row three">
+              <Field f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
+                <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
+              </Field>
+              <Field f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
+                <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
+                  <option value="">Choose</option>
+                  <option value="unfurnished">Unfurnished</option>
+                  <option value="partly furnished">Partly furnished</option>
+                  <option value="fully furnished">Fully furnished</option>
+                </select>
+              </Field>
+              <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station">
+                <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
+                  placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
+              </Field>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Price and photos</legend>
+            <div className="row">
+              <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
+                <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
+              </Field>
+              <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos">
+                <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
+              </Field>
+            </div>
+          </fieldset>
 
           <datalist id="buildings">{reference.buildings.map((b) => <option key={b.building_id} value={b.building_name} />)}</datalist>
           <datalist id="areas">{reference.areas.map((a) => <option key={a.area_id} value={a.area_name} />)}</datalist>
@@ -165,9 +177,12 @@ export default function Checker({ reference }) {
 
         <aside className="results" id="results">
           <section className="score">
-            <div className="score-head">
-              <span className="score-number">{result.score}</span>
-              <span className="score-of">of 100</span>
+            <div className="score-hero">
+              <ScoreRing score={result.score} />
+              <div>
+                <p className="score-word" data-band={scoreBand(result.score)}>{scoreWord(result.score)}</p>
+                <p className="score-sub">{problems.length === 0 ? "Nothing missing." : `${problems.length} field${problems.length === 1 ? "" : "s"} to fix.`}</p>
+              </div>
             </div>
             <ScoreBar fields={result.fields} />
             {problems.length === 0 ? (
@@ -221,6 +236,24 @@ function Field({ f, gain, htmlFor, children, hint, labelOverride }) {
         {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
       </p>
     </div>
+  );
+}
+
+// Red under 60, amber 60 to 84, green 85 and over. The same three tones as the price verdict.
+export const scoreBand = (s) => (s >= 85 ? "high" : s >= 60 ? "mid" : "low");
+const scoreWord = (s) => (s >= 85 ? "Ready to publish" : s >= 60 ? "Nearly there" : "Needs work");
+
+// A ring that fills by score, with the number inside.
+function ScoreRing({ score }) {
+  const r = 48, c = 2 * Math.PI * r;
+  return (
+    <svg className="ring" viewBox="0 0 112 112" role="img" aria-label={`Score ${score} of 100`} data-band={scoreBand(score)}>
+      <circle className="ring-track" cx="56" cy="56" r={r} fill="none" strokeWidth="8" />
+      <circle className="ring-fill" cx="56" cy="56" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
+        strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} transform="rotate(-90 56 56)" />
+      <text className="ring-number" x="56" y="58" textAnchor="middle" dominantBaseline="middle">{score}</text>
+      <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>
+    </svg>
   );
 }
 

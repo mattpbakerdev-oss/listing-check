@@ -22,8 +22,10 @@ export default function Importer() {
   return (
     <>
       <header className="top">
-        <h1><a href="/" className="plain">Listing check</a> · Import listings</h1>
-        <p className="banner">Load your own listings and the checker and the price benchmark run on them instead of the sample.</p>
+        <div className="top-inner">
+          <h1><a href="/" className="plain">Listing Check</a> · Import listings</h1>
+          <p className="purpose">Load your own listings and the checker and the price benchmark run on them instead of the sample.</p>
+        </div>
       </header>
 
       <div className="layout single">
