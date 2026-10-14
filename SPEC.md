@@ -56,11 +56,13 @@ Three fields get linear partial credit: title length, description length and pho
 ## 6. Price benchmark rules
 
 - Compute `rent_per_sqm = monthly_rent / size_sqm`.
-- Benchmark against the **median** rent per sqm of comparable listings. Compare like with like: the first of these with 3 or more listings wins, and the app shows which one was used.
+- Benchmark against the **median** rent per sqm of comparable listings. Compare like with like: the first of these with 8 or more listings wins, and the app shows which one was used.
   1. Same building, same bedroom count.
   2. Same area, same building tier (luxury, mid, budget), same bedroom count.
   3. Same area, same tier.
   4. The whole area.
+- If even the whole area has fewer than 8 priced listings, there is no verdict. The app says "not enough similar listings to judge" and shows the area's published low-to-high band instead. (The minimum was 3 until the 14 Oct review; a verdict from 3 listings is not a verdict.)
+- If the rent or the size is outside the completeness ranges, there is no price check. The app says to fix that field first.
 - In v1 every priced listing counts, including ones with status "let" and the listing being checked if it is already in the table.
 - Why tier is in the chain: on the sample data it cut wrongly flagged clean listings from 28% to 14% against a bedrooms-only chain (BUILD_LOG, 14 Oct 2026). Caveat: the sample generator priced by tier, so tier is bound to look good here. It needs re-checking on real listings, where tier is a judgement call per building.
 - Report the percentage difference. Bands: within 10% is "about right", 10 to 25% is "above/below market", more than 25% is "well above/below market, check for a typo".

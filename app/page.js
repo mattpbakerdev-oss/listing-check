@@ -9,7 +9,7 @@ async function loadReference() {
     auth: { persistSession: false },
   });
   const [areas, buildings] = await Promise.all([
-    supabase.from("areas").select("area_id, area_name, one_bed_typical, rent_sqm_typical").order("area_name"),
+    supabase.from("areas").select("area_id, area_name, one_bed_typical, rent_sqm_typical, rent_sqm_low, rent_sqm_high").order("area_name"),
     supabase.from("buildings").select("building_id, building_name, area_id, nearest_station, tier, aliases").order("building_name"),
   ]);
   if (areas.error) throw new Error(`Could not load areas: ${areas.error.message}`);

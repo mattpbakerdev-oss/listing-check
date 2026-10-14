@@ -95,9 +95,10 @@ async function main() {
   const { data: bbb } = await admin.from("building_bedroom_benchmark").select("*");
   const { data: atb } = await admin.from("area_tier_bedroom_benchmark").select("*");
   const { data: at } = await admin.from("area_tier_benchmark").select("*");
-  const bbbKey = new Set(bbb.filter((r) => r.n >= 3).map((r) => `${r.building_id}|${r.bedrooms}`));
-  const atbKey = new Set(atb.filter((r) => r.n >= 3).map((r) => `${r.area_id}|${r.tier}|${r.bedrooms}`));
-  const atKey = new Set(at.filter((r) => r.n >= 3).map((r) => `${r.area_id}|${r.tier}`));
+  const MIN = 8; // must match the chain minimum in the latest benchmark_listing migration
+  const bbbKey = new Set(bbb.filter((r) => r.n >= MIN).map((r) => `${r.building_id}|${r.bedrooms}`));
+  const atbKey = new Set(atb.filter((r) => r.n >= MIN).map((r) => `${r.area_id}|${r.tier}|${r.bedrooms}`));
+  const atKey = new Set(at.filter((r) => r.n >= MIN).map((r) => `${r.area_id}|${r.tier}`));
   const { data: all } = await admin.from("listings").select("*").not("size_sqm", "is", null).not("bedrooms", "is", null).order("listing_id");
   const expectBasis = (l) =>
     bbbKey.has(`${l.building_id}|${l.bedrooms}`) ? "building_bedrooms"
@@ -108,7 +109,7 @@ async function main() {
     const l = all.find((x) => expectBasis(x) === want);
     if (!l) { console.log(`note  no sample listing resolves to basis '${want}'`); continue; }
     const b = await benchmark(admin, l);
-    check(b.basis === want, `basis '${want}' is used when it is the first with 3+ comparables`, fmt(l, b));
+    check(b.basis === want, `basis '${want}' is used when it is the first with ${MIN}+ comparables`, fmt(l, b));
   }
   const tally = {};
   for (const l of all) tally[expectBasis(l)] = (tally[expectBasis(l)] ?? 0) + 1;

@@ -73,6 +73,12 @@ textarea[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-seri
 .field[data-status="invalid"] .fieldmsg { color: var(--alert); }
 .field[data-status="missing"] .fieldmsg { color: var(--muted); }
 .hint { font-size: 0.8125rem; color: var(--muted); }
+.hint:empty { display: none; }
+
+/* "+8" after a field gains points */
+.gain { color: var(--ok); font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 2.2s ease-out forwards; }
+@keyframes gain-fade { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .gain { animation: none; } }
 
 /* results */
 .results { display: grid; gap: 2rem; }
@@ -102,6 +108,7 @@ textarea[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-seri
 .bench-body[data-tone="ok"] { border-left-color: var(--ok); }
 .bench-body[data-tone="warn"] { border-left-color: var(--warn); }
 .bench-body[data-tone="alert"] { border-left-color: var(--alert); }
+.bench-body[data-tone="none"] .verdict strong { color: var(--muted); font-weight: 500; }
 .verdict { font-size: 1.125rem; margin-bottom: 0.625rem; }
 .bench-body[data-tone="warn"] .verdict strong { color: var(--warn); }
 .bench-body[data-tone="alert"] .verdict strong { color: var(--alert); }
@@ -113,10 +120,10 @@ textarea[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-seri
 
 /* fixed score strip on phones */
 .bottombar {
-  position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 0.875rem;
-  padding: 0.6rem 1rem; background: var(--ink); color: var(--paper); text-decoration: none;
-  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
+  position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.55rem 1rem; background: var(--ink); color: var(--paper); text-decoration: none;
+  padding-bottom: calc(0.55rem + env(safe-area-inset-bottom)); white-space: nowrap; overflow: hidden;
 }
-.bb-score { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.bb-of { font-size: 0.875rem; font-weight: 400; opacity: 0.7; }
-.bb-text { font-size: 0.9375rem; }
+.bb-score { font-size: 1.375rem; font-weight: 600; font-variant-numeric: tabular-nums; flex: none; }
+.bb-score::after { content: " ·"; font-weight: 400; opacity: 0.7; }
+.bb-text { font-size: 0.9375rem; overflow: hidden; text-overflow: ellipsis; }

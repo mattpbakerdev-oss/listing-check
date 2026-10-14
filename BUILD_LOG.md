@@ -137,3 +137,30 @@ Distribution: 145 at 100, 130 in the 90s, 95 in the 80s, 30 in the 70s. So the m
 **To run it locally:** `npm run dev`, then open http://localhost:3000. Needs `.env.local` with the Supabase URL and anon key.
 
 **Next:** step 4, the AI rewrite edge function with guardrails and the log.
+
+## 14 Oct 2026, review of the screen on a laptop and a 375px phone
+
+**What worked.** The example draft scored 81 with messages that said what to do. Fixing the floor and the caps title moved it from 81 to 91, exactly 8 + 2. "the met" matched The Met and filled in the station; "Met Sathorn" gave a clear unknown-building message. A rent of 5,000,000 was rejected with a sensible message. The price check explained its comparables in words with the sample size. On the phone: no horizontal scroll, every input 44px tall at 16px, no console errors.
+
+**What went wrong, in Matt's words:** the first thing a user did was load the example, and the example made the tool look like it was shouting. We had checked that it computed, nobody had checked how the demo felt. The example draft was priced 42% above market, so the first thing on screen was "check for a typo".
+
+**Fixes made**
+
+1. The default example is now a fairly priced draft with obvious gaps (caps title, thin description, no floor, no bathrooms, three photos). It is a Rhythm Rangnam 1-bed at 28 sqm for 17,000, which sits on the median for mid-tier Ratchathewi. The overpriced one is a second button, "Load a mispriced draft".
+2. No price check while the rent or the size is outside its range. The panel says "fix the rent first" instead of showing a 21,980% difference.
+3. Minimum of 8 comparables for a verdict. Two ways to apply it were measured on the sample, self-excluded:
+
+   | Where the 8 applies | Listings that get a verdict | Clean wrongly flagged | Mispriced caught | Mispriced with no verdict |
+   |---|---|---|---|---|
+   | UI only; chain still picks the first basis with 3 | 27% | 29% | 93% | 94 of 122 |
+   | Chain picks the first basis with 8 | 100% | 31% | 96% | 0 |
+
+   Suppressing in the UI alone would have hidden the verdict from three quarters of listings, including most of the mispriced ones, for no gain in accuracy. So migration `20261014180000_benchmark_min_8.sql` raises the chain's minimum to 8 and the UI shows "not enough similar listings to judge" with the area's published low-to-high band only when even the whole area has under 8. False-flag rate on listings that get a verdict, which is now all of them: 31%, against 35% before the change. Side effect: on 400 listings no building has 8 of the same bedroom count, so the building basis never fires on the sample. It will on real data.
+4. Phone strip is one line, "81 · 4 to fix · price high", with ellipsis if it still overflows, and tapping it scrolls to the results. The Next dev badge moved to the top right so it stops covering the score.
+5. A field that gains points shows "+8" next to its message for two seconds. Measured against the last settled state 700 ms after typing stops, so a title shows one "+6" rather than a flicker of "+0.3" per keystroke.
+6. A filled-in Thai description says "Thai description added. It will be used for the rewrite."
+7. The description message says what to add: "Too short. Mention the floor, the view, the furnishing or the nearest station", listing only the ones not yet mentioned. Three new tests pin the wording.
+
+Tests: 129 of 129. `next build` clean. `npm run check` all pass with the minimum of 8.
+
+**Next:** step 4, the AI rewrite edge function with guardrails and the log.

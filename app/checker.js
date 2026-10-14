@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
-import { band, basisLabel } from "../lib/benchmark/bands.js";
+import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 
 const EMPTY = {
@@ -11,8 +11,23 @@ const EMPTY = {
   bedrooms: "", bathrooms: "", monthly_rent_thb: "", furnishing: "", photo_count: "", nearest_station: "",
 };
 
-// A typical rushed draft: caps title, thin description, missing floor, three photos, rent too high.
+// A rushed draft with a fair price: caps title, thin description, no floor or bathrooms, three photos.
+// Rhythm Rangnam 1-beds at 28 sqm for 17,000 sit on the median for mid-tier Ratchathewi (sample L0036).
 const EXAMPLE = {
+  ...EMPTY,
+  title: "1 BED RHYTHM RANGNAM FOR RENT",
+  description: "Nice room, fully furnished, ready to move in. Call for details.",
+  building: "Rhythm Rangnam",
+  area: "Ratchathewi / Phaya Thai",
+  size_sqm: "28",
+  bedrooms: "1",
+  monthly_rent_thb: "17000",
+  furnishing: "fully furnished",
+  photo_count: "3",
+};
+
+// The same kind of draft, priced about 40% above its comparables.
+const MISPRICED = {
   ...EMPTY,
   title: "1 BED FOR RENT NOBLE REFINE PHROM PHONG",
   description: "Nice room, fully furnished, ready to move in. Near BTS. Call for details.",
@@ -28,15 +43,24 @@ const EXAMPLE = {
 };
 
 const baht = (n) => `฿${Math.round(Number(n)).toLocaleString("en-US")}`;
+const formatPts = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 export default function Checker({ reference }) {
   const [draft, setDraft] = useState(EMPTY);
   const result = useMemo(() => scoreListing(draft, reference), [draft, reference]);
-  const bench = useBenchmark(draft, result, reference);
+  const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
+  const bench = useBenchmark(draft, result, reference, byField);
+  const gains = useGains(result);
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }));
-  const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const problems = result.fields.filter((f) => f.status !== "ok");
+  const verdict = bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? band(bench.data.pct_diff) : null;
+
+  const jumpToResults = (e) => {
+    e.preventDefault();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("results")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  };
 
   return (
     <>
@@ -51,61 +75,63 @@ export default function Checker({ reference }) {
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-actions">
             <button type="button" onClick={() => setDraft(EXAMPLE)}>Load an example draft</button>
+            <button type="button" className="quiet" onClick={() => setDraft(MISPRICED)}>Load a mispriced draft</button>
             <button type="button" className="quiet" onClick={() => setDraft(EMPTY)}>Clear</button>
           </div>
 
-          <Field f={byField.title} htmlFor="title">
+          <Field f={byField.title} gain={gains.title} htmlFor="title">
             <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
           </Field>
 
-          <Field f={byField.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
+          <Field f={byField.description} gain={gains.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
             <textarea id="description" rows={5} value={draft.description} onChange={set("description")} />
           </Field>
 
-          <label className="field">
-            <span className="label">Thai description <span className="optional">optional</span></span>
+          <div className="field">
+            <label htmlFor="description_th" className="label">Thai description <span className="optional">optional</span></label>
             <textarea id="description_th" lang="th" rows={3} value={draft.description_th} onChange={set("description_th")} />
-          </label>
+            {draft.description_th.trim() ? <p className="hint">Thai description added. It will be used for the rewrite.</p> : null}
+          </div>
 
           <div className="row">
-            <Field f={byField.building} htmlFor="building">
+            <Field f={byField.building} gain={gains.building} htmlFor="building">
               <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
             </Field>
-            <Field f={byField.area} htmlFor="area">
+            <Field f={byField.area} gain={gains.area} htmlFor="area">
               <input id="area" list="areas" value={draft.area} onChange={set("area")} autoComplete="off" />
             </Field>
           </div>
 
           <div className="row three">
-            <Field f={byField.size_sqm} htmlFor="size_sqm">
+            <Field f={byField.size_sqm} gain={gains.size_sqm} htmlFor="size_sqm">
               <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
             </Field>
-            <Field f={byField.floor} htmlFor="floor">
+            <Field f={byField.floor} gain={gains.floor} htmlFor="floor">
               <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
             </Field>
-            <Field f={byField.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
+            <Field f={byField.monthly_rent_thb} gain={gains.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
               <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
             </Field>
           </div>
 
           <div className="row three">
-            <Field f={byField.bedrooms} htmlFor="bedrooms">
+            <Field f={byField.bedrooms} gain={gains.bedrooms} htmlFor="bedrooms">
               <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
                 <option value="">Choose</option>
                 <option value="0">Studio</option>
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </Field>
-            <Field f={byField.bathrooms} htmlFor="bathrooms">
+            <Field f={byField.bathrooms} gain={gains.bathrooms} htmlFor="bathrooms">
               <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
             </Field>
-            <Field f={byField.photo_count} htmlFor="photo_count">
+            <Field f={byField.photo_count} gain={gains.photo_count} htmlFor="photo_count">
               <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
             </Field>
           </div>
 
           <div className="row">
-            <Field f={byField.furnishing} htmlFor="furnishing">
+            <Field f={byField.furnishing} gain={gains.furnishing} htmlFor="furnishing">
               <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
                 <option value="">Choose</option>
                 <option value="unfurnished">Unfurnished</option>
@@ -113,7 +139,7 @@ export default function Checker({ reference }) {
                 <option value="fully furnished">Fully furnished</option>
               </select>
             </Field>
-            <Field f={byField.nearest_station} htmlFor="nearest_station" placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""}>
+            <Field f={byField.nearest_station} gain={gains.nearest_station} htmlFor="nearest_station">
               <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
                 placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
             </Field>
@@ -153,25 +179,26 @@ export default function Checker({ reference }) {
         </aside>
       </div>
 
-      <a className="bottombar" href="#results">
-        <span className="bb-score">{result.score}<span className="bb-of">/100</span></span>
-        <span className="bb-text">{problems.length === 0 ? "Complete" : `${problems.length} to fix`}{bench.status === "ready" ? ` · price ${band(bench.data.pct_diff).label}` : ""}</span>
+      <a className="bottombar" href="#results" onClick={jumpToResults}>
+        <span className="bb-score">{result.score}</span>
+        <span className="bb-text">
+          {problems.length === 0 ? "complete" : `${problems.length} to fix`}
+          {verdict ? ` · ${shortVerdict(verdict)}` : ""}
+        </span>
       </a>
     </>
   );
 }
 
-function formatPts(n) {
-  return Number.isInteger(n) ? n : n.toFixed(1);
-}
-
-function Field({ f, htmlFor, children, hint, labelOverride }) {
+function Field({ f, gain, htmlFor, children, hint, labelOverride }) {
   return (
     <div className="field" data-status={f.status}>
       <label htmlFor={htmlFor} className="label">{labelOverride ?? f.label}</label>
       {children}
-      {f.status !== "ok" && f.message ? <p className="fieldmsg">{f.message}</p> : hint ? <p className="hint">{hint}</p> : null}
-      {f.status === "ok" && f.message ? <p className="hint">{f.message}</p> : null}
+      <p className={f.status !== "ok" && f.message ? "fieldmsg" : "hint"}>
+        {f.status !== "ok" && f.message ? f.message : f.status === "ok" && f.message ? f.message : hint ?? ""}
+        {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
+      </p>
     </div>
   );
 }
@@ -190,18 +217,34 @@ function ScoreBar({ fields }) {
 }
 
 function Benchmark({ bench, draft, result, reference }) {
+  if (bench.status === "bad_rent") return <p className="muted">Fix the rent first, then the price check will run.</p>;
+  if (bench.status === "bad_size") return <p className="muted">Fix the size first, then the price check will run.</p>;
   if (bench.status === "idle") {
     return <p className="muted">Add the rent, the size and a known building or area to compare the price with the market.</p>;
   }
   if (bench.status === "loading") return <p className="muted">Comparing with the market…</p>;
   if (bench.status === "error") return <p className="muted">The price check is not available right now. {bench.error}</p>;
-  if (bench.status === "none") return <p className="muted">No comparable listings for this area yet, so no price check.</p>;
 
-  const d = bench.data;
-  const verdict = band(d.pct_diff);
   const building = reference.buildings.find((b) => b.building_id === result.matched.building_id);
   const areaId = result.matched.area_id ?? building?.area_id;
   const area = reference.areas.find((a) => a.area_id === areaId);
+
+  if (bench.status === "none" || bench.data.n < MIN_COMPARABLES) {
+    return (
+      <div className="bench-body" data-tone="none">
+        <p className="verdict"><strong>Not enough similar listings to judge</strong></p>
+        <dl className="bench-facts">
+          {bench.status === "ready" ? <div><dt>This listing</dt><dd>{baht(bench.data.listing_rent_per_sqm)} per sqm</dd></div> : null}
+          {area ? <div><dt>Rents in {area.area_name} usually run</dt><dd>{baht(area.rent_sqm_low)} to {baht(area.rent_sqm_high)} per sqm</dd></div> : null}
+          {area ? <div><dt>Typical 1-bed rent in {area.area_name}</dt><dd>{baht(area.one_bed_typical)} a month</dd></div> : null}
+        </dl>
+        <p className="hint">A verdict needs at least {MIN_COMPARABLES} comparable listings. {bench.status === "ready" ? `There are ${bench.data.n}.` : "There are none yet."}</p>
+      </div>
+    );
+  }
+
+  const d = bench.data;
+  const verdict = band(d.pct_diff);
   const pct = Number(d.pct_diff);
   const basis = basisLabel(d.basis, { buildingName: building?.building_name, areaName: area?.area_name, tier: building?.tier, bedrooms: num(draft.bedrooms) });
 
@@ -213,16 +256,17 @@ function Benchmark({ bench, draft, result, reference }) {
       </p>
       <dl className="bench-facts">
         <div><dt>This listing</dt><dd>{baht(d.listing_rent_per_sqm)} per sqm</dd></div>
-        <div><dt>Median for {basis}</dt><dd>{baht(d.median_rent_per_sqm)} per sqm, from {d.n} listing{d.n === 1 ? "" : "s"}</dd></div>
+        <div><dt>Median for {basis}</dt><dd>{baht(d.median_rent_per_sqm)} per sqm, from {d.n} listings</dd></div>
         {area ? <div><dt>Typical 1-bed rent in {area.area_name}</dt><dd>{baht(area.one_bed_typical)} a month</dd></div> : null}
       </dl>
-      {d.n < 8 ? <p className="hint">Only {d.n} comparable listings. Treat this as a rough guide.</p> : null}
     </div>
   );
 }
 
 // Calls benchmark_listing when there is enough to compare, debounced, ignoring stale responses.
-function useBenchmark(draft, result, reference) {
+// Does not run while the rent or size fails its completeness range: a 5,000,000 rent would
+// just produce a silly percentage.
+function useBenchmark(draft, result, reference, byField) {
   const [bench, setBench] = useState({ status: "idle" });
   const seq = useRef(0);
   const rent = num(draft.monthly_rent_thb);
@@ -230,8 +274,12 @@ function useBenchmark(draft, result, reference) {
   const bedrooms = num(draft.bedrooms);
   const buildingId = result.matched.building_id;
   const areaId = result.matched.area_id ?? reference.buildings.find((b) => b.building_id === buildingId)?.area_id ?? null;
+  const rentInvalid = byField.monthly_rent_thb.status === "invalid";
+  const sizeInvalid = byField.size_sqm.status === "invalid";
 
   useEffect(() => {
+    if (rentInvalid) { setBench({ status: "bad_rent" }); return; }
+    if (sizeInvalid) { setBench({ status: "bad_size" }); return; }
     if (!rent || !size || size <= 0 || !areaId) {
       setBench({ status: "idle" });
       return;
@@ -249,7 +297,41 @@ function useBenchmark(draft, result, reference) {
       else setBench({ status: "ready", data: data[0] });
     }, 350);
     return () => clearTimeout(timer);
-  }, [rent, size, bedrooms, buildingId, areaId]);
+  }, [rent, size, bedrooms, buildingId, areaId, rentInvalid, sizeInvalid]);
 
   return bench;
+}
+
+// "+8" next to a field that gained points. Compared against the last settled state, 700 ms
+// after the draft stops changing, so typing a title shows one "+6" rather than a flicker
+// of "+0.3" per keystroke. Each gain clears itself after a couple of seconds.
+function useGains(result) {
+  const settled = useRef(null);
+  const [gains, setGains] = useState({});
+
+  useEffect(() => {
+    const now = Object.fromEntries(result.fields.map((f) => [f.field, f.earned]));
+    if (!settled.current) { settled.current = now; return; }
+    const timer = setTimeout(() => {
+      const prev = settled.current;
+      settled.current = now;
+      const fresh = {};
+      for (const [field, earned] of Object.entries(now)) {
+        const delta = earned - (prev[field] ?? 0);
+        if (delta >= 0.5) fresh[field] = { amount: Math.round(delta * 10) / 10, key: Date.now() };
+      }
+      if (Object.keys(fresh).length === 0) return;
+      setGains((old) => ({ ...old, ...fresh }));
+      setTimeout(() => {
+        setGains((old) => {
+          const next = { ...old };
+          for (const [field, g] of Object.entries(fresh)) if (next[field]?.key === g.key) delete next[field];
+          return next;
+        });
+      }, 2200);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [result]);
+
+  return gains;
 }
