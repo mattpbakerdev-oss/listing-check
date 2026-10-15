@@ -40,7 +40,7 @@ export default function RewritePanel({ draft, setDraft, canRewrite }) {
     : thaiEmpty ? "Rewrite with AI and add a Thai version" : "Rewrite with AI";
 
   return (
-    <section className="rewrite" id="rewrite">
+    <section className="rewrite card" id="rewrite">
       <div className="rewrite-head">
         <h2>AI rewrite</h2>
         <div className="form-actions">

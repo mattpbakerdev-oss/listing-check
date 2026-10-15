@@ -4,9 +4,9 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 
 **Live:** https://listing-check.vercel.app
 
-![Listing Check on a laptop: the form on the left, the score ring and price check on the right](docs/screenshots/desktop-light.png)
+![Listing Check on a laptop: the form in cards on the left, the score ring and price check on the right](docs/screenshots/after-desktop-light.png)
 
-<img src="docs/screenshots/mobile-375.png" alt="Listing Check at 375px wide, with the score strip at the bottom" width="375">
+<img src="docs/screenshots/after-mobile-375.png" alt="Listing Check at 375px wide, one column of cards" width="375">
 
 ## What it does
 
@@ -33,7 +33,7 @@ How it was measured, and what went wrong along the way, is in [BUILD_LOG.md](BUI
 ## How to run it
 
 Copy `.env.example` to `.env.local` with your Supabase URL and keys, then `npm install && npm run dev` and open http://localhost:3000.
-`npm test` runs the 193 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above.
+`npm test` runs the 229 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above.
 
 ## Stack
 

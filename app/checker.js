@@ -106,26 +106,28 @@ export default function Checker({ reference }) {
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
-          <div className="form-actions">
-            <button type="button" onClick={() => loadDraft(EXAMPLE)}>Load an example draft</button>
-            <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}>Load a mispriced draft</button>
-            <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
+          <div className="form-top">
+            <div className="form-actions">
+              <button type="button" onClick={() => loadDraft(EXAMPLE)}>Load an example draft</button>
+              <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}>Load a mispriced draft</button>
+              <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
+            </div>
+
+            {autosave.offer ? (
+              <div className="restore-bar" role="status">
+                <span>You have an unfinished draft from {relativeTime(autosave.offer.savedAt, autosave.now)}.</span>
+                <span className="form-actions">
+                  <button type="button" onClick={restoreDraft}>Restore</button>
+                  <button type="button" className="quiet" onClick={autosave.discard}>Discard</button>
+                </span>
+              </div>
+            ) : autosave.savedAt ? (
+              <p className="saved-line" aria-live="polite">Draft saved · {relativeTime(autosave.savedAt, autosave.now)}</p>
+            ) : null}
           </div>
 
-          {autosave.offer ? (
-            <div className="restore-bar" role="status">
-              <span>You have an unfinished draft from {relativeTime(autosave.offer.savedAt, autosave.now)}.</span>
-              <span className="form-actions">
-                <button type="button" onClick={restoreDraft}>Restore</button>
-                <button type="button" className="quiet" onClick={autosave.discard}>Discard</button>
-              </span>
-            </div>
-          ) : autosave.savedAt ? (
-            <p className="saved-line" aria-live="polite">Draft saved · {relativeTime(autosave.savedAt, autosave.now)}</p>
-          ) : null}
-
-          <fieldset>
-            <legend>The listing</legend>
+          <fieldset className="card">
+            <legend><span className="marker" aria-hidden="true">01 · The listing</span>The listing</legend>
             <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
@@ -148,8 +150,8 @@ export default function Checker({ reference }) {
             ) : null}
           </fieldset>
 
-          <fieldset>
-            <legend>The unit</legend>
+          <fieldset className="card">
+            <legend><span className="marker" aria-hidden="true">02 · The unit</span>The unit</legend>
             <div className="row">
               <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -194,8 +196,8 @@ export default function Checker({ reference }) {
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>Price and photos</legend>
+          <fieldset className="card">
+            <legend><span className="marker" aria-hidden="true">03 · Price and photos</span>Price and photos</legend>
             <div className="row">
               <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
                 <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
@@ -212,7 +214,7 @@ export default function Checker({ reference }) {
         </form>
 
         <aside className="results" id="results">
-          <section className="score">
+          <section className="score card tinted">
             <div className="score-hero">
               <ScoreRing score={result.score} />
               <div>
@@ -238,7 +240,7 @@ export default function Checker({ reference }) {
 
           <BuildingCard building={matchedBuilding} />
 
-          <section className="bench">
+          <section className="bench card tinted">
             <h2>Price check</h2>
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
           </section>
@@ -285,7 +287,7 @@ function BuildingCard({ building }) {
   const year = building.completed_year;
   const age = year ? new Date().getFullYear() - year : null;
   return (
-    <section className="building-card" aria-label={`About ${building.building_name}`}>
+    <section className="building-card card" aria-label={`About ${building.building_name}`}>
       <h2>{building.building_name}</h2>
       <p className="building-line">
         {line?.colour ? <span className="line-dot" style={{ background: line.colour }} aria-hidden="true" /> : null}

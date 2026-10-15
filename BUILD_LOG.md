@@ -295,3 +295,31 @@ The footer said "nothing personal is stored". The rate limiter was storing each 
 ## 15 Oct 2026, closing entry
 
 v1 is live at https://listing-check.vercel.app and every step of the build order is done except the 60-second walkthrough. The primary metric is measured, not estimated: see the metric table in the polish pass above (`npm run metric`, 14 Oct 2026), where the 71 flagged sample listings go from a mean of 79.6 to 98.0 after every suggested fix, and all 71 reach 85. SPEC.md section 3 carries the same figures.
+
+## 15 Oct 2026, visual refinement: canvas, cards, markers
+
+Brief: a well-made internal tool, not a white form and not a landing page. Restraint over decoration. Before and after, taken with Playwright against the dev server with the example draft loaded:
+
+| | Before | After |
+|---|---|---|
+| Desktop 1280, light | [before-desktop-light.png](docs/screenshots/before-desktop-light.png) | [after-desktop-light.png](docs/screenshots/after-desktop-light.png) |
+| Desktop 1280, dark | [before-desktop-dark.png](docs/screenshots/before-desktop-dark.png) | [after-desktop-dark.png](docs/screenshots/after-desktop-dark.png) |
+| 375px, light | [before-mobile-375.png](docs/screenshots/before-mobile-375.png) | [after-mobile-375.png](docs/screenshots/after-mobile-375.png) |
+| 375px, dark | [before-mobile-375-dark.png](docs/screenshots/before-mobile-375-dark.png) | [after-mobile-375-dark.png](docs/screenshots/after-mobile-375-dark.png) |
+
+**What changed**, all in `app/globals.css` plus class names in the components.
+
+1. **Canvas and cards.** The page is off-white (`#f6f7f5`; `#0f1215` in dark). The three form sections, the score panel, the building card, the price check, the AI rewrite and the export each sit in a card: white, 1px hairline, one shadow layer at 5% opacity with a 2px blur, 8px radius. Padding is 20px on phones and 24px from 900px, through one `--card-pad` token. Cards are 16px apart, in both columns and between the two layout blocks. The import form and the 404 message are cards too, so the other pages match.
+2. **Section markers.** Each fieldset's legend now starts with "01 · The listing", "02 · The unit", "03 · Price and photos": system mono, 12px, 0.08em tracking, teal, aria-hidden so a screen reader hears the heading once. The heading under it is 17px semibold ink (16px on phones). The fieldset top rules and the rules above the rewrite and export sections are gone; the cards separate things now. The footer's top rule went too.
+3. **Results panel.** The score card and the price check card carry a teal tint, 4% over white (`#f5f9fa`; `#1a2227` in dark), so the right column reads as the tool's voice and the form as the agent's input. The building card between them stays white, because it is a fact sheet rather than a verdict. The ring grew from 112 to 120px and its number from 32 to 40px; the band word beside it keeps the band colour; the segment bar sits 12px under the ring instead of 14. The fields-to-fix rows are white on the tint with a hairline and their status rule on the left.
+4. **Accent discipline.** Teal is now on the product name in the header, primary buttons, focus rings, section markers and links, and nothing else. The secondary buttons (mispriced draft, Clear, Copy as JSON, Download JSON, Discard, Close, Accept all unflagged) are a neutral outline: ink text, white, a slightly stronger hairline. The restore bar's left rule went from teal to ink. Counted on the live DOM in the first 1280 by 900 viewport with the example loaded: five teal elements at rest (name, import link, primary button, two markers), six with a field focused. The whole page has ten, because the rewrite button, the Copy as text button, the third marker and two more links are below the fold.
+5. **Type.** IBM Plex Sans and its Thai companion, unchanged. Heading line height 1.2 to 1.15. On phones h1 drops from 24 to 20px and h2 from 17 to 16px. Body stays 16px. Labels are 14px medium in a neutral dark grey (`#3a4350`) rather than ink.
+6. **States.** Inputs rest on a neutral border a step darker than the hairline so they read as fields on a white card. Focus is a teal border with a 3px teal ring at 22% in place of the outline. Amber and red borders appear only when the field has a message, as before, and focus wins over them while the agent is typing. Every input and button is still 44px tall.
+
+**Dark mode** swaps the same tokens: deep neutral canvas, slightly lighter cards, the tint mixed from the dark accent, a darker shadow that is just visible on the card edge. Checked in the two dark screenshots above and in the compact header.
+
+**Not added:** gradients, icons, illustrations, extra webfonts (the marker uses the system mono stack), animation beyond the existing overlay and points flash, heavy shadows, large radii.
+
+**Verified.** 229 tests, `next build` clean, no console errors in any of the eight screenshots, no horizontal scroll at 375px, compact header 58px. The Open Graph image was re-rendered from the new page at 1200 by 843. The README screenshots point at the after set and the three older screenshot files are removed.
+
+**What went wrong.** The first OG render came out at 2400 by 1686 because the screenshot context was at 2x for the documentation shots while the metadata declares 1200 by 843; re-rendered at 1x. And the example draft scores 70 in these screenshots where the 14 Oct review entry says 81. Checked against git: the example and the scoring rules are unchanged since that commit, and the example scored 70 then too. The 81 was the earlier, overpriced example that the review replaced; the entry recorded the number before the swap. Nothing to change in the code.

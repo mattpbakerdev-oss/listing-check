@@ -9,7 +9,7 @@ export default function NotFound() {
         </div>
       </header>
       <main className="layout single notfound">
-        <section>
+        <section className="card">
           <h2>There is nothing at this address</h2>
           <p className="muted">The checker is one page, and this is not it.</p>
           <p><a href="/">Back to the checker</a></p>

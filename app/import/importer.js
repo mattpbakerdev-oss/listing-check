@@ -29,7 +29,7 @@ export default function Importer() {
       </header>
 
       <div className="layout single">
-        <form className="form import" onSubmit={submit}>
+        <form className="form import card" onSubmit={submit}>
           <p>
             The file needs the same columns as <code>data/listings.csv</code>: listing_id, building_id, area_id, title, description_en,
             description_th, bedrooms, bathrooms, size_sqm, floor, monthly_rent_thb, furnishing, photo_count, nearest_station, listed_date,

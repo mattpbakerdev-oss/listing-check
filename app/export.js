@@ -29,7 +29,7 @@ export default function ExportPanel({ draft, result, bench }) {
   }
 
   return (
-    <section className="export" id="export">
+    <section className="export card" id="export">
       <div className="rewrite-head">
         <h2>Export</h2>
         <div className="form-actions">
