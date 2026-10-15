@@ -230,6 +230,11 @@ mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid va
 .tick { color: var(--ok); font-weight: 700; }
 .overlay-foot { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; position: sticky; bottom: 0; background: var(--paper); padding-top: 0.5rem; }
 
+/* footer and 404 */
+.foot { max-width: 1100px; margin: 2rem auto 0; padding: 1rem 1rem 2rem; border-top: 1px solid var(--rule); font-size: 0.875rem; color: var(--muted); }
+.notfound section { display: grid; gap: 0.5rem; padding-top: 1rem; }
+.notfound h2 { font-size: 1.25rem; }
+
 /* export and import */
 .export { border-top: 1px solid var(--rule); padding-top: 1.5rem; display: grid; gap: 1rem; }
 .export-text { font-family: var(--font); line-height: 1.5; background: var(--well); }

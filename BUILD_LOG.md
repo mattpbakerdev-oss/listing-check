@@ -267,4 +267,19 @@ What went wrong, in order. The first metric run hit the rewrite rate limit after
 
 A map preview was considered for this spot and not built. A map needs tiles from an outside service, which means an API key, a cost, a third-party request on every page view, and a privacy note; the buildings table has no coordinates, so each of the 67 would need geocoding first; and an agent already knows where the building is. What they are about to be asked by a tenant is how far the station is, which line, how old the building is, and whether the price is right, and the card answers those from data we hold.
 
+## 15 Oct 2026, finishing pass
+
+A marketing-site checklist was reviewed and most of it skipped, because this is an internal tool for agents, not a public page: no analytics, no SEO keywords or sitemap, no share buttons, no newsletter or testimonials, no cookie banner (there are no cookies), no pricing page. Taken, because they help the one thing a demo link is used for, being pasted into a chat and opened on a phone:
+
+- Page title "Listing Check", a one-sentence description, and Open Graph and Twitter card tags with the desktop screenshot resized to 1200px as the image, so a pasted link shows a preview. `metadataBase` set so the image URL is absolute.
+- A favicon: a white tick in a teal circle, SVG at `app/icon.svg` with a 32px PNG fallback rendered from it with Playwright.
+- A 404 page in the same style with a link back to the checker.
+- Loading states confirmed: the price check shows "Comparing with the market…" during the call, and the importer's button reads "Loading…" and is disabled; the importer gained a status line too, since a few hundred rows take a few seconds.
+- A one-line footer: demo credit, a note on data, and the GitHub link.
+- `robots.txt` disallowing everything, plus a `noindex` meta tag, since robots.txt alone does not keep an already-linked page out of search.
+
+One wording note for Matt. The footer says "nothing personal is stored". Two things are stored: the draft, in the agent's own browser (localStorage, never sent anywhere until they press a button), and in `rewrite_log` on the server, the listing text sent for rewriting plus the caller's IP address for the rate limit. Listing text is about a flat, not a person, but an IP address is personal data under most definitions. The line stands as asked; it may want to read "nothing about you is stored" or mention the IP, and the rate-limit IP could be hashed. Neither change was made without a decision.
+
+Verified on the live site after deploy: the Open Graph tags and image URL in the page head, the image returning 200 at 1200 by 843, `/robots.txt`, both icons, and a made-up URL returning the 404 page. No OG debugger was used; the tags were read directly from the served HTML, which is what a chat app reads.
+
 **Still to do from the build order:** record the 60-second walkthrough. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.

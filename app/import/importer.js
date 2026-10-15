@@ -54,6 +54,7 @@ export default function Importer() {
             </button>
           </div>
 
+          {state.status === "loading" ? <p className="muted" role="status">Reading the file and checking every row. A few hundred rows take a few seconds.</p> : null}
           {state.status === "error" ? <p className="fieldmsg">{state.error}</p> : null}
 
           {state.status === "done" || (state.status === "error" && state.data?.skipped) ? (
