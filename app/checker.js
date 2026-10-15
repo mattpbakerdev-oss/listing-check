@@ -8,6 +8,7 @@ import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { lineFor } from "../lib/stations.js";
+import { stepStatuses } from "../lib/steps.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 
@@ -55,15 +56,20 @@ export default function Checker({ reference }) {
   // Bumped whenever the whole draft is replaced (Clear, example buttons). The rewrite panel
   // is keyed on it, so it remounts with no rewrite, no edits and nothing accepted.
   const [session, setSession] = useState(0);
+  // Steps 4 and 5 of the stepper: a rewrite has been applied, the listing has been copied or downloaded.
+  const [applied, setApplied] = useState(false);
+  const [exported, setExported] = useState(false);
   const autosave = useAutosave(draft);
   // Clear and the example buttons replace the whole draft and forget the saved one.
-  const loadDraft = (d) => { autosave.forget(); setDraft(d); setSession((s) => s + 1); };
+  const loadDraft = (d) => { autosave.forget(); setDraft(d); setSession((s) => s + 1); setApplied(false); setExported(false); };
   const restoreDraft = () => { const d = autosave.restore(); if (d) { setDraft({ ...EMPTY, ...d }); setSession((s) => s + 1); } };
   const result = useMemo(() => scoreListing(draft, reference), [draft, reference]);
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
   const gains = useGains(result);
   const compact = useCompactHeader();
+  const steps = stepStatuses(result.fields, { applied, exported });
+  const empty = isEmptyDraft(draft);
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }));
   const problems = result.fields.filter((f) => f.status !== "ok");
@@ -72,14 +78,39 @@ export default function Checker({ reference }) {
 
   // Scroll so the results sit just under the sticky header. The header is 58px once compact,
   // which it will be by the time the scroll lands, so use that rather than its current height.
+  // Scroll so `el` sits `extra` px under the sticky header. The header compresses once the page
+  // has scrolled, which moves everything above the target up by (full - compact), so the full
+  // header height is the right offset from either state. Chrome's scroll anchoring would then
+  // shift the scroll position to compensate for the shrink, landing the target low, so anchoring
+  // is off for the programmatic scroll and the position is checked for a few frames after it ends.
+  const scrollUnderHeader = (el, extra = 8) => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const root = document.documentElement;
+    const header = () => document.querySelector("header.top")?.getBoundingClientRect().height ?? 0;
+    root.style.overflowAnchor = "none";
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - header() - extra, behavior: reduce ? "auto" : "smooth" });
+    let frames = 0;
+    const settle = () => {
+      const off = el.getBoundingClientRect().top - header() - extra;
+      if (Math.abs(off) > 2) window.scrollBy({ top: off, behavior: "auto" });
+      if (++frames < 4) requestAnimationFrame(settle); else root.style.overflowAnchor = "";
+    };
+    const start = () => requestAnimationFrame(settle);
+    if ("onscrollend" in window) window.addEventListener("scrollend", start, { once: true });
+    else setTimeout(start, reduce ? 50 : 700);
+  };
   const jumpToResults = (e) => {
     e.preventDefault();
     const el = document.getElementById("results");
+    if (el) scrollUnderHeader(el);
+  };
+  // Stepper and Next buttons: scroll the target's card under the header and focus the field.
+  const goTo = (id) => (e) => {
+    e?.preventDefault?.();
+    const el = document.getElementById(id);
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const headerNow = document.querySelector("header.top")?.getBoundingClientRect().height ?? 0;
-    const offset = (compact ? headerNow : 58) + 8;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: reduce ? "auto" : "smooth" });
+    scrollUnderHeader(el.closest(".card") ?? el, 12);
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.focus({ preventScroll: true });
   };
 
   return (
@@ -88,11 +119,14 @@ export default function Checker({ reference }) {
         <div className="top-inner">
           <div className="top-row">
             <h1>Listing Check</h1>
+            <ol className="top-steps" aria-hidden="true">
+              {steps.map((s) => <li key={s.id} data-status={s.status} />)}
+            </ol>
             <a className="top-score" href="#results" onClick={jumpToResults} aria-label={`Score ${result.score} of 100. Jump to the results.`}>
               <ScoreRing score={result.score} small />
               {gains.total ? <span className="gain" key={gains.total.key} aria-live="polite">+{gains.total.amount}</span> : null}
               <span className="top-score-text">
-                {problems.length === 0 ? "complete" : `${problems.length} to fix`}
+                {empty ? "empty" : problems.length === 0 ? "complete" : `${problems.length} to fix`}
                 {verdict ? ` · ${shortVerdict(verdict)}` : ""}
               </span>
             </a>
@@ -103,6 +137,8 @@ export default function Checker({ reference }) {
           </p>
         </div>
       </header>
+
+      <Stepper steps={steps} goTo={goTo} />
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -148,6 +184,7 @@ export default function Checker({ reference }) {
                 <input id="title_th" lang="th" value={draft.title_th} onChange={set("title_th")} />
               </div>
             ) : null}
+            <div className="card-foot"><button type="button" className="quiet" onClick={goTo("building")}>Next: The unit</button></div>
           </fieldset>
 
           <fieldset className="card">
@@ -189,23 +226,27 @@ export default function Checker({ reference }) {
                   <option value="fully furnished">Fully furnished</option>
                 </select>
               </Field>
-              <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station">
+              <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station"
+                help="The nearest BTS or MRT station. Filled in from our building table when the building is known; type one to override it.">
                 <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
                   placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
               </Field>
             </div>
+            <div className="card-foot"><button type="button" className="quiet" onClick={goTo("monthly_rent_thb")}>Next: Price and photos</button></div>
           </fieldset>
 
           <fieldset className="card">
             <legend><span className="marker" aria-hidden="true">03 · Price and photos</span>Price and photos</legend>
             <div className="row">
-              <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)">
+              <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)"
+                help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
                 <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
               </Field>
               <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos">
                 <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
               </Field>
             </div>
+            <div className="card-foot"><button type="button" className="quiet" onClick={goTo("rewrite")}>Next: AI rewrite</button></div>
           </fieldset>
 
           <datalist id="buildings">{reference.buildings.map((b) => <option key={b.building_id} value={b.building_name} />)}</datalist>
@@ -218,12 +259,12 @@ export default function Checker({ reference }) {
             <div className="score-hero">
               <ScoreRing score={result.score} />
               <div>
-                <p className="score-word" data-band={scoreBand(result.score)}>{scoreWord(result.score)}</p>
-                <p className="score-sub">{problems.length === 0 ? "Nothing missing." : `${problems.length} field${problems.length === 1 ? "" : "s"} to fix.`}</p>
+                <p className="score-word" data-band={empty ? "empty" : scoreBand(result.score)}>{empty ? "Nothing to check yet" : scoreWord(result.score)}</p>
+                <p className="score-sub">{empty ? "Start with the title, or load an example draft." : problems.length === 0 ? "Nothing missing." : `${problems.length} field${problems.length === 1 ? "" : "s"} to fix.`}</p>
               </div>
             </div>
             <ScoreBar fields={result.fields} />
-            {problems.length === 0 ? (
+            {empty ? null : problems.length === 0 ? (
               <p className="allgood">Every field is complete. Check the price below, then publish.</p>
             ) : (
               <ul className="problems">
@@ -250,27 +291,58 @@ export default function Checker({ reference }) {
       </div>
 
       <div className="layout single">
-        <RewritePanel key={session} draft={draft} setDraft={setDraft} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
-        <ExportPanel draft={draft} result={result} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
+        <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
+        <ExportPanel draft={draft} result={result} onExported={() => setExported(true)} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 
     </>
   );
 }
 
-function Field({ f, gain, htmlFor, children, hint, labelOverride }) {
+function Field({ f, gain, htmlFor, children, hint, help, labelOverride }) {
+  const [showHelp, setShowHelp] = useState(false);
+  const label = labelOverride ?? f.label;
   return (
     <div className="field" data-status={f.status}>
       {/* The gain flash lives in the label, which is always there, so it never changes the layout. */}
-      <label htmlFor={htmlFor} className="label">
-        {labelOverride ?? f.label}
-        {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
-      </label>
+      <div className="label-row">
+        <label htmlFor={htmlFor} className="label">
+          {label}
+          {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
+        </label>
+        {help ? (
+          <button type="button" className="help" aria-label={`About ${label}`} aria-expanded={showHelp} aria-controls={`${htmlFor}-help`} onClick={() => setShowHelp((v) => !v)}>?</button>
+        ) : null}
+      </div>
       {children}
+      {help && showHelp ? <p id={`${htmlFor}-help`} className="hint">{help}</p> : null}
       <p className={f.status !== "ok" && f.message ? "fieldmsg" : "hint"}>
         {f.status !== "ok" && f.message ? f.message : f.status === "ok" && f.message ? f.message : hint ?? ""}
       </p>
     </div>
+  );
+}
+
+// Five steps under the header. Done, current and to do come from lib/steps.js; a tap scrolls to the card.
+function Stepper({ steps, goTo }) {
+  const current = steps.find((s) => s.status === "current");
+  return (
+    <nav className="stepper-wrap" aria-label="Progress">
+      <ol className="stepper">
+        {steps.map((s) => (
+          <li key={s.id} data-status={s.status}>
+            <a href={`#${s.target}`} onClick={goTo(s.target)} aria-current={s.status === "current" ? "step" : undefined}>
+              <span className="step-dot" aria-hidden="true">{s.status === "done" ? "✓" : s.n}</span>
+              <span className="step-label">{s.label}</span>
+              <span className="sr-only">, {s.status === "done" ? "done" : s.status === "current" ? "current step" : "to do"}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p className="stepper-now" aria-hidden="true">
+        {current ? `Step ${current.n} of 5 · ${current.heading}` : "All five steps done"}
+      </p>
+    </nav>
   );
 }
 

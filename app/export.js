@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { listingText, listingJson } from "../lib/export/format.js";
 
-export default function ExportPanel({ draft, result, bench }) {
+export default function ExportPanel({ draft, result, bench, onExported }) {
   const [copied, setCopied] = useState(null);
   const text = listingText(draft, result);
   const json = () => JSON.stringify(listingJson(draft, result, bench), null, 2);
@@ -13,6 +13,7 @@ export default function ExportPanel({ draft, result, bench }) {
     try {
       await navigator.clipboard.writeText(kind === "text" ? text : json());
       setCopied(kind);
+      onExported?.();
       setTimeout(() => setCopied(null), 2000);
     } catch {
       setCopied("failed");
@@ -26,6 +27,7 @@ export default function ExportPanel({ draft, result, bench }) {
     a.download = `listing-${(draft.building || "draft").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
+    onExported?.();
   }
 
   return (

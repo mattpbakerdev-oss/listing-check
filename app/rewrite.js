@@ -7,7 +7,7 @@ import ReviewOverlay from "./review-overlay.js";
 
 // The panel is remounted (key change) whenever the draft is replaced, so Clear and the
 // example buttons also clear any rewrite in progress. See lib/rewrite/state.js.
-export default function RewritePanel({ draft, setDraft, canRewrite }) {
+export default function RewritePanel({ draft, setDraft, canRewrite, onApplied }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const thaiEmpty = !(draft.description_th ?? "").trim() && !(draft.title_th ?? "").trim();
 
@@ -27,6 +27,7 @@ export default function RewritePanel({ draft, setDraft, canRewrite }) {
     const entries = acceptedEntries(state);
     if (entries.length) {
       setDraft((d) => ({ ...d, ...Object.fromEntries(entries.map((e) => [e.draft, e.text])) }));
+      onApplied?.();
       if (state.data.log_id && !state.applied) {
         supabaseBrowser().functions.invoke("rewrite", { body: { action: "accept", log_id: state.data.log_id, accepted: true } });
       }
