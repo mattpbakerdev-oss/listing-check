@@ -292,4 +292,6 @@ The footer said "nothing personal is stored". The rate limiter was storing each 
 
 **Verified live** after deploy: a browser-style call succeeds, the new row's `client_key` is 64 hex characters, and no row in the table holds anything shaped like an address.
 
-**Still to do from the build order:** record the 60-second walkthrough. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.
+## 15 Oct 2026, closing entry
+
+v1 is live at https://listing-check.vercel.app and every step of the build order is done except the 60-second walkthrough. The primary metric is measured, not estimated: see the metric table in the polish pass above (`npm run metric`, 14 Oct 2026), where the 71 flagged sample listings go from a mean of 79.6 to 98.0 after every suggested fix, and all 71 reach 85. SPEC.md section 3 carries the same figures.

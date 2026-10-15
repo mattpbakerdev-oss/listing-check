@@ -2,7 +2,7 @@
 
 **Owner:** Matt Baker
 **Date:** 14 October 2026
-**Status:** Draft, pre-build
+**Status:** v1 live, 15 October 2026, at https://listing-check.vercel.app
 
 ## 1. Problem
 
