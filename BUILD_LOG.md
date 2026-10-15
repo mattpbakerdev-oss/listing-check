@@ -323,3 +323,17 @@ Brief: a well-made internal tool, not a white form and not a landing page. Restr
 **Verified.** 229 tests, `next build` clean, no console errors in any of the eight screenshots, no horizontal scroll at 375px, compact header 58px. The Open Graph image was re-rendered from the new page at 1200 by 843. The README screenshots point at the after set and the three older screenshot files are removed.
 
 **What went wrong.** The first OG render came out at 2400 by 1686 because the screenshot context was at 2x for the documentation shots while the metadata declares 1200 by 843; re-rendered at 1x. And the example draft scores 70 in these screenshots where the 14 Oct review entry says 81. Checked against git: the example and the scoring rules are unchanged since that commit, and the example scored 70 then too. The 81 was the earlier, overpriced example that the review replaced; the entry recorded the number before the swap. Nothing to change in the code.
+
+## 15 Oct 2026, the visual pass was reported done while the live site still showed the old build
+
+Matt opened listing-check.vercel.app and saw the white page with no cards and no markers. Checked before changing anything:
+
+- Local main was two commits ahead of origin/main (the spec and log tidy, and the visual pass). Neither had been pushed. The work was committed and reported as done, and nothing in the report said it was unpushed and undeployed.
+- The production alias pointed at a deployment Matt had made from his terminal with `vercel --prod` at 22:16, from the working tree at the previous commit. Its build log shows a file upload, not a git clone.
+- The served HTML had plain fieldsets and the old colour tokens, so the site was faithfully showing the last thing deployed.
+
+Fixed by pushing main and running `vercel --prod`. Verified on the live HTML: the three section markers, seven card elements, and the canvas and tint tokens in the served stylesheet.
+
+**What was wrong in my own reasoning.** I told Matt the project deploys only from the CLI, because `vercel project inspect` lists no git connection and every recent build log began with a file upload. Both facts were true and the conclusion was false. The GitHub repo was already connected: the push produced a git-cloned production deployment of dcc3fcc eight seconds before the CLI one, and the earlier pairs of deployments were the same thing, Matt's push and his `vercel --prod` landing together. `vercel git connect` confirmed the link. From here on a push to main is enough, and the CLI step is redundant rather than required.
+
+**Rule for the log.** "Done" means committed, pushed and, for anything visible, verified on the live URL. A report that stops at the commit should say so in the first line.
