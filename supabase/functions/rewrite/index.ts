@@ -16,6 +16,7 @@ import { z } from "npm:zod";
 import { zodOutputFormat } from "npm:@anthropic-ai/sdk/helpers/zod";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { factCheck, type ListingInput } from "../_shared/factcheck.ts";
+import { clientIpFrom, hashClient } from "../_shared/ratelimit.ts";
 
 // Default model, and the models a caller may ask for instead (used by scripts/rewrite-sample.mjs
 // to compare). Anything else falls back to the default.
@@ -106,15 +107,18 @@ Deno.serve(async (req) => {
   const listingId = typeof body.listing_id === "string" ? body.listing_id : null;
   const model = ALLOWED_MODELS.includes(String(body.model)) ? String(body.model) : DEFAULT_MODEL;
 
-  // Rate limit before spending any model tokens. Calls made with the service role key
-  // (our own scripts, never the browser) are not limited.
-  const clientIp = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  // Rate limit before spending any model tokens. The caller is identified by a salted hash of
+  // the IP; the raw address is never stored or compared. Calls made with the service role key
+  // (our own scripts, never the browser) are not limited and are logged as "service_role".
   const isServiceRole = jwtRole(req.headers.get("authorization")) === "service_role";
+  const salt = Deno.env.get("RATE_LIMIT_SALT") ?? "";
+  if (!isServiceRole && !salt) return json({ error: "The rewrite is not configured (RATE_LIMIT_SALT is not set)." }, 500);
+  const clientKey = isServiceRole ? "service_role" : await hashClient(clientIpFrom(req.headers.get("x-forwarded-for")), salt);
   if (!isServiceRole) {
     const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [perIp, total] = await Promise.all([
-      supabase.from("rewrite_log").select("id", { count: "exact", head: true }).eq("client_ip", clientIp).gte("created_at", hourAgo),
+      supabase.from("rewrite_log").select("id", { count: "exact", head: true }).eq("client_key", clientKey).gte("created_at", hourAgo),
       supabase.from("rewrite_log").select("id", { count: "exact", head: true }).gte("created_at", dayAgo),
     ]);
     if (perIp.error || total.error) return json({ error: "Could not check the rewrite limit. Try again in a moment." }, 500);
@@ -183,7 +187,7 @@ Deno.serve(async (req) => {
     .from("rewrite_log")
     .insert({
       listing_id: listingId,
-      client_ip: isServiceRole ? "service_role" : clientIp,  // script runs must not count against the office IP they ran from
+      client_key: clientKey,
       model: response.model,
       prompt: { system: SYSTEM, input: payload },
       response: { output: rewrite, usage: response.usage, stop_reason: response.stop_reason },

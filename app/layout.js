@@ -39,7 +39,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <footer className="foot">
-          Demo by Matt Baker. Sample data, nothing personal is stored. <a href="https://github.com/mattpbakerdev-oss/listing-check">Source on GitHub</a>.
+          Demo by Matt Baker. Runs on sample data. Drafts stay in your browser; rewrite requests are logged without anything that identifies you. <a href="https://github.com/mattpbakerdev-oss/listing-check">Source on GitHub</a>.
         </footer>
       </body>
     </html>

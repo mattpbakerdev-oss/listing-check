@@ -282,4 +282,14 @@ One wording note for Matt. The footer says "nothing personal is stored". Two thi
 
 Verified on the live site after deploy: the Open Graph tags and image URL in the page head, the image returning 200 at 1200 by 843, `/robots.txt`, both icons, and a made-up URL returning the 404 page. No OG debugger was used; the tags were read directly from the served HTML, which is what a chat app reads.
 
+## 15 Oct 2026, the footer made a claim the code did not back up
+
+The footer said "nothing personal is stored". The rate limiter was storing each caller's IP address in `rewrite_log`. The fix was to change the code first and the wording second.
+
+**Code.** The limiter now identifies a caller by a SHA-256 hash of the IP with a server-side salt (`RATE_LIMIT_SALT`, a random 32-byte secret set in Supabase, never in the repo). It compares hashes, never addresses, and refuses to run if the salt is missing rather than fall back to the raw IP. The column was renamed from `client_ip` to `client_key` so nothing can mistake it for an address, and the migration nulls every raw IP that earlier rows held. Script runs keep the `service_role` marker. The hashing lives in `_shared/ratelimit.ts` with 8 tests: deterministic, 64 hex characters, no trace of the address, a different salt gives a different hash, an empty salt is refused. A search of the repo for the old column name and the forwarded-for header finds only the historical migration, the one line in the function that feeds the hash, and these log entries.
+
+**Wording.** The footer now reads: "Demo by Matt Baker. Runs on sample data. Drafts stay in your browser; rewrite requests are logged without anything that identifies you. Source on GitHub." Every clause is true of the code: drafts are in localStorage, and the log holds the listing text, the model's answer and a salted hash.
+
+**Verified live** after deploy: a browser-style call succeeds, the new row's `client_key` is 64 hex characters, and no row in the table holds anything shaped like an address.
+
 **Still to do from the build order:** record the 60-second walkthrough. The metric's "before" number is in the step 2 and data sections above (71 flagged listings, mean 79.6); the "after" number needs a pass through the tool with every suggested fix accepted, which is a script over the sample once the rewrite's accepted text is counted as a fix.
