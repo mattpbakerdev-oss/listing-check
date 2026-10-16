@@ -14,7 +14,8 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 2. A completeness score out of 100, with the exact fields that are missing or weak and what to add.
 3. A price check: rent per sqm against the median of comparable listings (same building and bedroom count, else same area, tier and bedroom count, and so on), with the sample size and the comparables named in words.
 4. An AI rewrite in English and Thai. Every number and amenity word in the output is checked against the draft and the building record; anything not in the input is flagged for the agent to remove or confirm. Nothing is applied without a click.
-5. Export as text or JSON. A CSV importer loads your own listings so it runs on real data instead of the sample.
+5. A preview of the draft as a rental portal would show it, with every missing field named in its slot.
+6. Export as text or JSON. A CSV importer loads your own listings so it runs on real data instead of the sample.
 
 ## The metric
 
@@ -33,7 +34,7 @@ How it was measured, and what went wrong along the way, is in [BUILD_LOG.md](BUI
 ## How to run it
 
 Copy `.env.example` to `.env.local` with your Supabase URL and keys, then `npm install && npm run dev` and open http://localhost:3000.
-`npm test` runs the 236 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above.
+`npm test` runs the 246 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above.
 
 ## Stack
 

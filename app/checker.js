@@ -11,6 +11,7 @@ import { lineFor } from "../lib/stations.js";
 import { stepStatuses } from "../lib/steps.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
+import PreviewOverlay from "./preview.js";
 
 const EMPTY = {
   title: "", description: "", description_th: "", title_th: "", building: "", area: "", size_sqm: "", floor: "",
@@ -59,6 +60,7 @@ export default function Checker({ reference }) {
   // Steps 4 and 5 of the stepper: a rewrite has been applied, the listing has been copied or downloaded.
   const [applied, setApplied] = useState(false);
   const [exported, setExported] = useState(false);
+  const [preview, setPreview] = useState(null); // id of the button that opened it, for focus return
   const autosave = useAutosave(draft);
   // Clear and the example buttons replace the whole draft and forget the saved one.
   const loadDraft = (d) => { autosave.forget(); setDraft(d); setSession((s) => s + 1); setApplied(false); setExported(false); };
@@ -75,6 +77,7 @@ export default function Checker({ reference }) {
   const problems = result.fields.filter((f) => f.status !== "ok");
   const verdict = bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? band(bench.data.pct_diff) : null;
   const matchedBuilding = result.matched.building_id ? reference.buildings.find((b) => b.building_id === result.matched.building_id) : null;
+  const matchedArea = reference.areas.find((a) => a.area_id === (result.matched.area_id ?? matchedBuilding?.area_id)) ?? null;
 
   // Scroll so the results sit just under the sticky header. The header is 58px once compact,
   // which it will be by the time the scroll lands, so use that rather than its current height.
@@ -277,6 +280,11 @@ export default function Checker({ reference }) {
                 ))}
               </ul>
             )}
+            {empty ? null : (
+              <div className="form-actions">
+                <button type="button" className="quiet" id="preview-button-results" onClick={() => setPreview("preview-button-results")}>Preview as a listing</button>
+              </div>
+            )}
           </section>
 
           <BuildingCard building={matchedBuilding} />
@@ -292,8 +300,11 @@ export default function Checker({ reference }) {
 
       <div className="layout single">
         <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
-        <ExportPanel draft={draft} result={result} onExported={() => setExported(true)} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
+        <ExportPanel draft={draft} result={result} onExported={() => setExported(true)} onPreview={() => setPreview("preview-button")} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
+
+      <PreviewOverlay open={preview !== null} onClose={() => setPreview(null)} returnFocusTo={preview ?? undefined}
+        draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} />
 
     </>
   );

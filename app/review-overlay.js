@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { FIELDS, remainingFlags, canAccept, progress } from "../lib/rewrite/state.js";
+import { useDialog } from "./use-dialog.js";
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -21,31 +22,8 @@ export default function ReviewOverlay({ state, dispatch, draft, onDone, returnFo
   const panel = useRef(null);
   const heading = useRef(null);
   const p = progress(state);
-
-  useEffect(() => {
-    if (!state.open) return;
-    const previous = document.activeElement;
-    heading.current?.focus();
-    document.body.style.overflow = "hidden";
-    const onKey = (e) => {
-      if (e.key === "Escape") { e.preventDefault(); dispatch({ type: "close" }); }
-      if (e.key === "Tab" && panel.current) {
-        // Keep Tab inside the overlay.
-        const focusable = panel.current.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
-        if (!focusable.length) return;
-        const first = focusable[0], last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      const target = document.getElementById(returnFocusTo) ?? previous;
-      target?.focus?.();
-    };
-  }, [state.open, dispatch, returnFocusTo]);
+  const close = useCallback(() => dispatch({ type: "close" }), [dispatch]);
+  useDialog({ open: state.open, onClose: close, panelRef: panel, headingRef: heading, returnFocusTo });
 
   if (!state.open || state.status !== "ready") return null;
 

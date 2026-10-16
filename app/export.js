@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { listingText, listingJson } from "../lib/export/format.js";
 
-export default function ExportPanel({ draft, result, bench, onExported }) {
+export default function ExportPanel({ draft, result, bench, onExported, onPreview }) {
   const [copied, setCopied] = useState(null);
   const text = listingText(draft, result);
   const json = () => JSON.stringify(listingJson(draft, result, bench), null, 2);
@@ -38,6 +38,7 @@ export default function ExportPanel({ draft, result, bench, onExported }) {
           <button type="button" onClick={() => copy("text")} disabled={empty}>{copied === "text" ? "Copied" : "Copy as text"}</button>
           <button type="button" className="quiet" onClick={() => copy("json")} disabled={empty}>{copied === "json" ? "Copied" : "Copy as JSON"}</button>
           <button type="button" className="quiet" onClick={download} disabled={empty}>Download JSON</button>
+          <button type="button" className="quiet" id="preview-button" onClick={onPreview} disabled={empty}>Preview as a listing</button>
         </div>
       </div>
       {copied === "failed" ? <p className="fieldmsg">Copying did not work in this browser. Select the text below and copy it.</p> : null}
