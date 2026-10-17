@@ -31,6 +31,9 @@ export type ListingInput = {
   furnishing?: string | null;
   photo_count?: number | string | null;
   nearest_station?: string | null;
+  contract_months?: number | string | null;
+  deposit_months?: number | string | null;
+  advance_months?: number | string | null;
 };
 
 export type BuildingRecord = {
@@ -149,7 +152,7 @@ export function factCheck(rewrite: Partial<Rewrite>, listing: ListingInput, buil
   ].map(str).join("\n");
 
   const allowedNumbers = new Set<string>(extractNumbers(inputText));
-  for (const v of [listing.size_sqm, listing.floor, listing.bedrooms, listing.bathrooms, listing.monthly_rent_thb, listing.photo_count, building?.walk_min, building?.completed_year]) {
+  for (const v of [listing.size_sqm, listing.floor, listing.bedrooms, listing.bathrooms, listing.monthly_rent_thb, listing.photo_count, listing.contract_months, listing.deposit_months, listing.advance_months, building?.walk_min, building?.completed_year]) {
     for (const n of extractNumbers(str(v))) allowedNumbers.add(n);
   }
   const allowedConcepts = new Set(findConcepts(inputText).map((h) => h.concept));

@@ -169,7 +169,10 @@ button:disabled { opacity: 0.45; cursor: default; }
 }
 
 .field { display: grid; gap: 0.3rem; align-content: start; }
-.label-row { display: flex; align-items: center; gap: 0.4rem; }
+.label-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.terms { display: grid; gap: 0.75rem; }
+.terms .label-row { justify-content: space-between; }
+button.small { min-height: 36px; padding: 0.35rem 0.7rem; font-size: 0.875rem; }
 .label { font-size: 0.875rem; font-weight: 500; color: var(--label); }
 /* "?" beside a label: toggles a line of help under the input. 28px drawn, 44px to tap. */
 .help { position: relative; width: 28px; height: 28px; min-height: 0; padding: 0; border-radius: 50%; font-size: 13px; font-weight: 600; line-height: 1; background: transparent; color: var(--muted); border: 1.5px solid var(--rule-strong); }

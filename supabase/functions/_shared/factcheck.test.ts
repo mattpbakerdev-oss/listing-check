@@ -147,3 +147,16 @@ describe("factCheck is robust to missing data", () => {
     assert.deepEqual(r.facts_added, []);
   });
 });
+
+describe("lease terms the agent confirmed are facts the model may state", () => {
+  const base = { title: "Studio at Rhythm Rangnam", description: "Bright studio.", description_th: "", building: "Rhythm Rangnam", area: "Ratchathewi", size_sqm: 28, floor: 6, bedrooms: 0, bathrooms: 1, monthly_rent_thb: null, furnishing: "fully furnished", photo_count: 5, nearest_station: "" };
+  const out: Rewrite = { title_en: "Studio at Rhythm Rangnam", description_en: "Bright studio on the 6th floor. 12-month contract, 2 months deposit, 1 month advance.", title_th: "สตูดิโอ Rhythm Rangnam", description_th: "สัญญา 12 เดือน มัดจำ 2 เดือน ล่วงหน้า 1 เดือน", facts_used: [] };
+  test("with the terms in the input, nothing is flagged", () => {
+    const r = factCheck(out, { ...base, contract_months: 12, deposit_months: 2, advance_months: 1 }, null);
+    assert.deepEqual(r.facts_added, []);
+  });
+  test("without them, the 12 is an added fact", () => {
+    const r = factCheck(out, base, null);
+    assert.ok(r.facts_added.includes("12"), JSON.stringify(r.facts_added));
+  });
+});

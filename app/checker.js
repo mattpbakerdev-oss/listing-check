@@ -17,7 +17,10 @@ import PreviewOverlay from "./preview.js";
 const EMPTY = {
   title: "", description: "", description_th: "", title_th: "", building: "", area: "", size_sqm: "", floor: "",
   bedrooms: "", bathrooms: "", monthly_rent_thb: "", furnishing: "", photo_count: "", nearest_station: "",
+  // Lease terms: optional, confirmed by the agent, not scored. The rewrite may state them once set.
+  contract_months: "", deposit_months: "", advance_months: "",
 };
+const USUAL_TERMS = { contract_months: "12", deposit_months: "2", advance_months: "1" };
 
 // A rushed draft with a fair price: caps title, thin description, no floor or bathrooms, three photos.
 // Rhythm Rangnam 1-beds at 28 sqm for 17,000 sit on the median for mid-tier Ratchathewi (sample L0036).
@@ -254,9 +257,30 @@ export default function Checker({ reference }) {
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
                 <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
               </Field>
-              <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos">
+              <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos (5 or more)">
                 <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
               </Field>
+            </div>
+            <div className="terms">
+              <div className="label-row">
+                <span className="label">Lease terms <span className="optional">optional, not scored</span></span>
+                <button type="button" className="quiet small" onClick={() => setDraft((d) => ({ ...d, ...USUAL_TERMS }))}>Use the usual terms</button>
+              </div>
+              <div className="row three">
+                <div className="field">
+                  <label htmlFor="contract_months" className="label">Contract (months)</label>
+                  <input id="contract_months" type="number" inputMode="numeric" min="0" value={draft.contract_months} onChange={set("contract_months")} />
+                </div>
+                <div className="field">
+                  <label htmlFor="deposit_months" className="label">Deposit (months)</label>
+                  <input id="deposit_months" type="number" inputMode="numeric" min="0" value={draft.deposit_months} onChange={set("deposit_months")} />
+                </div>
+                <div className="field">
+                  <label htmlFor="advance_months" className="label">Advance rent (months)</label>
+                  <input id="advance_months" type="number" inputMode="numeric" min="0" value={draft.advance_months} onChange={set("advance_months")} />
+                </div>
+              </div>
+              <p className="hint">Once set, the rewrite states them in both languages and they go into the export and the preview.</p>
             </div>
             <div className="card-foot"><button type="button" className="quiet" onClick={goTo("rewrite")}>Next: AI rewrite</button></div>
           </fieldset>

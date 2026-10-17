@@ -56,7 +56,7 @@ Rules:
 - Do not mention the rent. It is not in the input on purpose: it has its own field on the listing.
 - Do not mention the photo count.
 - If the building record includes the year it was completed, you may mention it. If it does not, do not guess one.
-- Do not invent contract terms or deposits unless the draft states them.
+- Do not invent contract terms or deposits unless the draft states them. If the draft has contract_months, deposit_months or advance_months, state those terms once in the description in both languages, for example "12-month contract, 2 months deposit, 1 month advance".
 - In facts_used, list every fact you relied on, quoted from the input.`;
 
 // Mention the completion year only for buildings this new. Older years are left out of the

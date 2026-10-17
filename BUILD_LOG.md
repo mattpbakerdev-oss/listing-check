@@ -381,3 +381,13 @@ Read against the product: the five-photo rule already exists and the agent did n
 **Verified** with Playwright at 375px: Draft by default with results hidden; Check shows the results and hides the form; a step 4 tap lands in Rewrite; a step 2 tap stays in Draft and puts the unit card 70px under the compact header with Building focused; "Next: AI rewrite" lands in Rewrite; the header ring lands in Check; the title survives a round trip through Export; no horizontal scroll; no console errors. Desktop: no bar, all four sections visible, step tap unchanged. 250 tests, `next build` clean.
 
 **Two design notes.** The stepper stays only on the Draft tab, since it is about the draft; the tab bar does the navigating elsewhere. The tap highlight is hover-guarded so a touched tab does not keep a grey wash.
+
+## 17 Oct 2026, lease terms as confirmed facts, and the photo rule in the label
+
+**Lease terms.** Three optional fields under Price and photos: contract months, deposit months, advance rent months, with a "Use the usual terms" button that fills 12, 2 and 1. Not scored: the example still reads 70 with them set, and the 100-point table and the metric are untouched. Once set they are facts in the agent's draft, so the guardrail stays intact: the prompt now says to state them once in both languages when present, the fact checker's number whitelist includes them, the export text gets a line ("12-month contract · 2 months deposit · 1 month advance", only the parts set), the JSON carries the three as integers or null, and the preview's details table shows them as Contract, Deposit and Advance rent rows. An absent term is not a gap. Screenshot: [terms-card.png](docs/screenshots/terms-card.png). 7 new tests across the export formatter, the preview model and the fact checker; 257 in total.
+
+**Edge function redeployed** as version 18 with `supabase functions deploy rewrite --use-api`. One live call with the example draft plus the usual terms, through the anon key as the browser would: Sonnet 5.5 in 8.4 s, English "Terms: 12-month contract, 2 months deposit, 1 month advance", Thai "สัญญา 12 เดือน เงินประกัน 2 เดือน ชำระล่วงหน้า 1 เดือน", `facts_added` empty. Without the fields the same 12 is flagged, which a test now pins.
+
+**Photo rule.** The agent who reviewed the app asked for a five-photo recommendation that already existed as a rule. The label now reads "Number of photos (5 or more)", so it is visible before anything is typed, not only in the message after.
+
+Items 2 and 3 of the plan from the agent feedback. Next: the station-proximity benchmark trial, measured before anything ships.
