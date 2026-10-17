@@ -9,6 +9,7 @@ import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmar
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { lineFor } from "../lib/stations.js";
 import { stepStatuses } from "../lib/steps.js";
+import { TABS, tabForTarget } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 import PreviewOverlay from "./preview.js";
@@ -61,6 +62,9 @@ export default function Checker({ reference }) {
   const [applied, setApplied] = useState(false);
   const [exported, setExported] = useState(false);
   const [preview, setPreview] = useState(null); // id of the button that opened it, for focus return
+  // Phone tabs. Desktop ignores this: the CSS only hides sections under 900px.
+  const [tab, setTab] = useState("draft");
+  const [pendingScroll, setPendingScroll] = useState(null);
   const autosave = useAutosave(draft);
   // Clear and the example buttons replace the whole draft and forget the saved one.
   const loadDraft = (d) => { autosave.forget(); setDraft(d); setSession((s) => s + 1); setApplied(false); setExported(false); };
@@ -102,22 +106,27 @@ export default function Checker({ reference }) {
     if ("onscrollend" in window) window.addEventListener("scrollend", start, { once: true });
     else setTimeout(start, reduce ? 50 : 700);
   };
-  const jumpToResults = (e) => {
-    e.preventDefault();
-    const el = document.getElementById("results");
-    if (el) scrollUnderHeader(el);
-  };
-  // Stepper and Next buttons: scroll the target's card under the header and focus the field.
+  // Stepper, Next buttons and the header ring: switch to the tab that holds the target (a no-op
+  // on desktop), then once it is on screen scroll its card under the header and focus the field.
   const goTo = (id) => (e) => {
     e?.preventDefault?.();
-    const el = document.getElementById(id);
-    if (!el) return;
-    scrollUnderHeader(el.closest(".card") ?? el, 12);
-    if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.focus({ preventScroll: true });
+    setTab(tabForTarget(id));
+    setPendingScroll({ id, key: Date.now() });
   };
+  const jumpToResults = goTo("results");
+  useEffect(() => {
+    if (!pendingScroll) return;
+    const el = document.getElementById(pendingScroll.id);
+    if (el) {
+      scrollUnderHeader(el.closest(".card") ?? el, 12);
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.focus({ preventScroll: true });
+    }
+    setPendingScroll(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingScroll]);
 
   return (
-    <>
+    <div className="app" data-tab={tab}>
       <header className={`top${compact ? " compact" : ""}`}>
         <div className="top-inner">
           <div className="top-row">
@@ -294,7 +303,7 @@ export default function Checker({ reference }) {
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
           </section>
 
-          <p className="to-rewrite"><a href="#rewrite">Rewrite with AI</a>, below the form.</p>
+          <p className="to-rewrite"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
         </aside>
       </div>
 
@@ -306,7 +315,15 @@ export default function Checker({ reference }) {
       <PreviewOverlay open={preview !== null} onClose={() => setPreview(null)} returnFocusTo={preview ?? undefined}
         draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} />
 
-    </>
+      <nav className="tabbar" aria-label="Sections">
+        {TABS.map((t) => (
+          <button type="button" key={t.id} className="tab" aria-current={tab === t.id ? "page" : undefined} onClick={() => { setTab(t.id); window.scrollTo({ top: 0 }); }}>
+            {t.label}
+            {t.id === "check" && !empty && problems.length ? <span className="tab-count" aria-label={`${problems.length} to fix`}>{problems.length}</span> : null}
+          </button>
+        ))}
+      </nav>
+    </div>
   );
 }
 
