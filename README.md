@@ -34,7 +34,7 @@ How it was measured, and what went wrong along the way, is in [BUILD_LOG.md](BUI
 ## How to run it
 
 Copy `.env.example` to `.env.local` with your Supabase URL and keys, then `npm install && npm run dev` and open http://localhost:3000.
-`npm test` runs the 257 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above.
+`npm test` runs the 260 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above. The walkthrough script is in [docs/walkthrough.md](docs/walkthrough.md).
 
 ## Stack
 

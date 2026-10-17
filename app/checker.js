@@ -5,7 +5,7 @@ import { reducer as autosaveReducer, initialState as autosaveInitial, isEmptyDra
 import { readDraft, writeDraft, removeDraft } from "../lib/drafts/storage.js";
 import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
-import { band, basisLabel, shortVerdict, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
+import { band, basisLabel, shortVerdict, MIN_COMPARABLES, proximityNote } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { lineFor } from "../lib/stations.js";
 import { stepStatuses } from "../lib/steps.js";
@@ -520,6 +520,7 @@ function Benchmark({ bench, draft, result, reference }) {
         <div><dt>Median for {basis}</dt><dd>{baht(d.median_rent_per_sqm)} per sqm, from {d.n} listings</dd></div>
         {area ? <div><dt>Typical 1-bed rent in {area.area_name}</dt><dd>{baht(area.one_bed_typical)} a month</dd></div> : null}
       </dl>
+      {proximityNote(building) ? <p className="hint">{proximityNote(building)}</p> : null}
     </div>
   );
 }

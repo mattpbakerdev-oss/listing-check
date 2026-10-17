@@ -391,3 +391,23 @@ Read against the product: the five-photo rule already exists and the agent did n
 **Photo rule.** The agent who reviewed the app asked for a five-photo recommendation that already existed as a rule. The label now reads "Number of photos (5 or more)", so it is visible before anything is typed, not only in the message after.
 
 Items 2 and 3 of the plan from the agent feedback. Next: the station-proximity benchmark trial, measured before anything ships.
+
+## 17 Oct 2026, station-proximity benchmark trial: measured, not shipped
+
+The agent asked for pricing that accounts for distance to BTS and MRT. Before touching the chain, `scripts/benchmark-variants.mjs` computed every candidate client-side from the listings and buildings tables, self-excluded, minimum 8, the same way the tier chain was chosen. Walking minutes come from the building table (1 to 21, median 7); "near" is 7 minutes or under.
+
+| Chain | Clean wrongly flagged (>10%) | Clean in red (>25%) | Mispriced caught | Typo-priced in red |
+|---|---|---|---|---|
+| Current: building+bed, area+tier+bed, area+tier, area | 35/112 (31%) | 4/112 (4%) | 117/122 (96%) | 46/46 |
+| Walk band inside tier (near/far) | 33/112 (29%) | 5/112 (4%) | 116/122 (95%) | 46/46 |
+| Walk band inside tier (near/mid/far) | 35/112 (31%) | 4/112 (4%) | 117/122 (96%) | 46/46 |
+| Walk band instead of tier | 54/112 (48%) | 12/112 (11%) | 118/122 (97%) | 46/46 |
+| Same station + tier, then area + tier | 36/112 (32%) | 4/112 (4%) | 117/122 (96%) | 46/46 |
+
+**Reading.** The best walk variant moves two clean listings out of the flagged set and one mispriced listing into the missed set. That is noise, not a gain. Dropping tier for distance is clearly worse. And the reason is in the generator: the sample price is area typical, times tier, times an age discount, times a unit-size effect, times noise. Walking time is not in it. Among clean listings in area-and-tier groups of 8 or more, the near and far halves sit at 1.009 and 0.985 of their group median, on 7 and 10 listings. The sample cannot show a proximity effect because it was built without one.
+
+**Decision.** The chain stays as it is. The price check now ends with a line the agent can weigh: "Comparables are not filtered by distance to a station. Rhythm Rangnam is a 3 minute walk from BTS Victory Monument." (`proximityNote` in `lib/benchmark/bands.js`, 3 tests; 260 in total.) On real listings, where distance does move rent, the trial script is the way to re-run this: point it at the imported data and read the same table.
+
+**Walkthrough.** The one open item from the build order is Matt's to record. `docs/walkthrough.md` is the 60-second script, with Do Not Disturb as the first step, as the agent advised.
+
+That closes the plan from the agent feedback: phone tabs, lease terms, the photo rule in the label, the proximity trial, and the walkthrough script. Nothing in the 100-point table or the metric changed.
