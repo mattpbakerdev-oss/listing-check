@@ -45,7 +45,10 @@ export default function ExportPanel({ draft, result, bench, onExported, onPrevie
       {empty ? (
         <p className="muted">Fill in the draft and the finished listing appears here, ready to paste.</p>
       ) : (
-        <textarea className="export-text" readOnly rows={Math.min(16, text.split("\n").length + 1)} value={text} aria-label="Finished listing as text" />
+        <>
+          <p className="hint">The finished listing as text, ready to paste.</p>
+          <textarea className="export-text" readOnly rows={Math.min(16, text.split("\n").length + 1)} value={text} aria-label="Finished listing as text" />
+        </>
       )}
     </section>
   );

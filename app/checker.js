@@ -156,14 +156,15 @@ export default function Checker({ reference }) {
       </header>
 
       <Stepper steps={steps} goTo={goTo} />
+      <p className="phone-note phone-only">Sample data. <a href="/import">Import your listings</a> to run it on your own.</p>
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-top">
-            <div className="form-actions">
-              <button type="button" onClick={() => loadDraft(EXAMPLE)}>Load an example draft</button>
-              <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}>Load a mispriced draft</button>
-              <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>
+            <div className="form-actions demo">
+              <button type="button" onClick={() => loadDraft(EXAMPLE)}><span className="phone-only">Example</span><span className="desktop-only">Load an example draft</span></button>
+              <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}><span className="phone-only">Mispriced</span><span className="desktop-only">Load a mispriced draft</span></button>
+              {isEmptyDraft(draft) ? null : <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>}
             </div>
 
             {autosave.offer ? (
@@ -208,7 +209,7 @@ export default function Checker({ reference }) {
           <fieldset className="card">
             <legend className="sr-only">The unit</legend>
             <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span></div>
-            <div className="row">
+            <div className="row wide">
               <Field quiet={empty} f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
               </Field>
@@ -217,13 +218,16 @@ export default function Checker({ reference }) {
               </Field>
             </div>
 
-            <div className="row three">
+            <div className="row">
               <Field quiet={empty} f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
                 <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
               </Field>
               <Field quiet={empty} f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
                 <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
               </Field>
+            </div>
+
+            <div className="row">
               <Field quiet={empty} f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
                 <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
                   <option value="">Choose</option>
@@ -231,12 +235,12 @@ export default function Checker({ reference }) {
                   {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </Field>
-            </div>
-
-            <div className="row three">
               <Field quiet={empty} f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
                 <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
               </Field>
+            </div>
+
+            <div className="row wide">
               <Field quiet={empty} f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
                 <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
                   <option value="">Choose</option>
@@ -258,11 +262,11 @@ export default function Checker({ reference }) {
             <legend className="sr-only">Price and photos</legend>
             <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span></div>
             <div className="row">
-              <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)"
+              <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride={<><span className="phone-only">Rent (THB)</span><span className="desktop-only">Monthly rent (THB)</span></>}
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
                 <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
               </Field>
-              <Field quiet={empty} f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos (5 or more)">
+              <Field quiet={empty} f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride={<><span className="phone-only">Photos (5 or more)</span><span className="desktop-only">Number of photos (5 or more)</span></>}>
                 <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
               </Field>
             </div>
@@ -271,7 +275,7 @@ export default function Checker({ reference }) {
                 <span className="label">Lease terms <span className="optional">optional, not scored</span></span>
                 <button type="button" className="quiet small" onClick={() => setDraft((d) => ({ ...d, ...USUAL_TERMS }))}>Use the usual terms</button>
               </div>
-              <div className="row three">
+              <div className="row">
                 <div className="field">
                   <label htmlFor="contract_months" className="label">Contract (months)</label>
                   <input id="contract_months" type="number" inputMode="numeric" min="0" value={draft.contract_months} onChange={set("contract_months")} />
@@ -280,6 +284,8 @@ export default function Checker({ reference }) {
                   <label htmlFor="deposit_months" className="label">Deposit (months)</label>
                   <input id="deposit_months" type="number" inputMode="numeric" min="0" value={draft.deposit_months} onChange={set("deposit_months")} />
                 </div>
+              </div>
+              <div className="row">
                 <div className="field">
                   <label htmlFor="advance_months" className="label">Advance rent (months)</label>
                   <input id="advance_months" type="number" inputMode="numeric" min="0" value={draft.advance_months} onChange={set("advance_months")} />
@@ -332,7 +338,7 @@ export default function Checker({ reference }) {
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
           </section>
 
-          <p className="to-rewrite"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
+          <p className="to-rewrite"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a><span className="desktop-only">, below the form.</span><span className="phone-only"> in the Rewrite tab.</span></p>
         </aside>
       </div>
 
@@ -371,7 +377,7 @@ function Field({ f, gain, htmlFor, children, hint, help, labelOverride, quiet = 
           {gain ? <span className="gain" key={gain.key} aria-live="polite"> +{formatPts(gain.amount)}</span> : null}
         </label>
         {help ? (
-          <button type="button" className="help" aria-label={`About ${label}`} aria-expanded={showHelp} aria-controls={`${htmlFor}-help`} onClick={() => setShowHelp((v) => !v)}>?</button>
+          <button type="button" className="help" aria-label={`About ${typeof label === "string" ? label : f.label}`} aria-expanded={showHelp} aria-controls={`${htmlFor}-help`} onClick={() => setShowHelp((v) => !v)}>?</button>
         ) : null}
       </div>
       {children}
@@ -398,7 +404,7 @@ function Stepper({ steps, goTo }) {
         ))}
       </ol>
       <p className="stepper-now" aria-hidden="true">
-        {current ? `Step ${current.n} of 5 · ${current.heading}` : "All five steps done"}
+        {current ? `${current.n} of 5 · ${current.heading}` : "All done"}
       </p>
     </nav>
   );
