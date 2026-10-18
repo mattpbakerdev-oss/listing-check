@@ -216,18 +216,18 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .score > :not(:first-child) { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
 .score > .form-actions:not(:first-child) { margin-top: 1rem; padding-top: 0; border-top: 0; }
 .score-hero { display: flex; align-items: center; gap: 1rem; }
-.ring { width: 120px; height: 120px; flex: none; }
+.ring { width: 112px; height: 112px; flex: none; } /* 1 viewBox unit = 1px, so the text sizes below are real pixels */
 .ring-track { stroke: var(--rule); }
 .ring-fill { stroke: var(--muted); transition: stroke-dashoffset 300ms ease-out, stroke 300ms; }
 .ring[data-band="low"] .ring-fill { stroke: var(--alert); }
 .ring[data-band="mid"] .ring-fill { stroke: var(--warn); }
 .ring[data-band="high"] .ring-fill { stroke: var(--ok); }
 @media (prefers-reduced-motion: reduce) { .ring-fill { transition: none; } }
-.ring-number { font-size: 2.5rem; font-weight: 600; fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.ring-number { font-size: 40px; line-height: 1; font-weight: 600; fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .ring[data-size="small"] .ring-number { font-size: 2.75rem; letter-spacing: 0; }
 .ring[data-size="small"] .ring-track, .ring[data-size="small"] .ring-fill { stroke-width: 11; }
 .ring[data-size="small"] .ring-fill { stroke: var(--ink); } /* the header ring is chrome: neutral, the big ring carries the band */
-.ring-of { font-size: 0.75rem; fill: var(--muted); }
+.ring-of { font-size: 12px; fill: var(--muted); }
 .score-word { font-size: 1.0625rem; font-weight: 400; line-height: 1.35; color: var(--ink); } /* the ring carries the colour */
 .score-sub { color: var(--muted); font-size: 0.9375rem; margin-top: 0.25rem; }
 .gain-chip { display: inline-block; margin-bottom: 0.5rem; padding: 0.15rem 0.5rem; border-radius: var(--radius); background: var(--ok-soft); color: var(--ok); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 3s ease-out forwards; }

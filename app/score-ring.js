@@ -14,8 +14,10 @@ export function ScoreRing({ score, small = false }) {
       <circle className="ring-fill" cx="56" cy="56" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
         strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} transform="rotate(-90 56 56)" />
       {/* "central" puts the glyph box's true middle on y, so the number sits at the ring's centre whatever the stroke */}
-      <text className="ring-number" x="56" y={small ? "56" : "58"} textAnchor="middle" dominantBaseline="central">{score}</text>
-      {small ? null : <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>}
+      {/* Large: the number (40px, line-height 1) and "of 100" (12px) stacked with a 4px gap, the pair centred on
+          the ring. Measured on the rendered ink, not the font boxes: digits 32..61, label 71..80, pair centred on 56. */}
+      <text className="ring-number" x="56" y={small ? "56" : "45"} textAnchor="middle" dominantBaseline="central">{score}</text>
+      {small ? null : <text className="ring-of" x="56" y="75" textAnchor="middle" dominantBaseline="central">of 100</text>}
     </svg>
   );
 }
