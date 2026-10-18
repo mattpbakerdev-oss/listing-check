@@ -4,7 +4,7 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 
 **Live:** https://listing-check.vercel.app
 
-![Listing Check at 1280 and 375 side by side: the stepper in the desktop header, the tab bar on the phone, the same results panel on both](docs/screenshots/pass4-example-light.png)
+![Listing Check at 1280, 1024 and 375 side by side: the stepper in the desktop header, the results pane on the right, the tab bar on the phone](docs/screenshots/pass5-example-light.png)
 
 <img src="docs/screenshots/pass2-phone-check-light.png" alt="Listing Check at 375px wide: the Check tab, with the score ring in the header and Draft, Check, Rewrite and Export tabs along the bottom" width="375">
 
@@ -14,8 +14,7 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 2. A completeness score out of 100, with the exact fields that are missing or weak and what to add.
 3. A price check: rent per sqm against the median of comparable listings (same building and bedroom count, else same area, tier and bedroom count, and so on), with the sample size and the comparables named in words.
 4. An AI rewrite in English and Thai. Every number and amenity word in the output is checked against the draft and the building record; anything not in the input is flagged for the agent to remove or confirm. Nothing is applied without a click.
-5. A preview of the draft as a rental portal would show it, with every missing field named in its slot.
-6. Export as text or JSON. A CSV importer loads your own listings so it runs on real data instead of the sample.
+5. Export: the finished listing as a portal would show it, with every missing field named in its slot, then copy as text or JSON. A CSV importer loads your own listings so it runs on real data instead of the sample.
 
 ## The metric
 
