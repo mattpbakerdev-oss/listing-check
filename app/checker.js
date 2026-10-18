@@ -180,11 +180,11 @@ export default function Checker({ reference }) {
           <fieldset className="card">
             <legend className="sr-only">The listing</legend>
             <div className="card-head" aria-hidden="true"><span className="marker">01 · The listing</span><span className="card-title">The listing</span></div>
-            <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
+            <Field quiet={empty} f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
 
-            <Field f={byField.description} gain={gains.fields.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
+            <Field quiet={empty} f={byField.description} gain={gains.fields.description} htmlFor="description" hint="English. At least 150 characters, and mention two of: floor, view, furnishing, nearest station.">
               <textarea id="description" rows={5} value={draft.description} onChange={set("description")} />
             </Field>
 
@@ -207,22 +207,22 @@ export default function Checker({ reference }) {
             <legend className="sr-only">The unit</legend>
             <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span></div>
             <div className="row">
-              <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
+              <Field quiet={empty} f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
               </Field>
-              <Field f={byField.area} gain={gains.fields.area} htmlFor="area">
+              <Field quiet={empty} f={byField.area} gain={gains.fields.area} htmlFor="area">
                 <input id="area" list="areas" value={draft.area} onChange={set("area")} autoComplete="off" />
               </Field>
             </div>
 
             <div className="row three">
-              <Field f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
+              <Field quiet={empty} f={byField.size_sqm} gain={gains.fields.size_sqm} htmlFor="size_sqm">
                 <input id="size_sqm" type="number" inputMode="decimal" min="0" value={draft.size_sqm} onChange={set("size_sqm")} />
               </Field>
-              <Field f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
+              <Field quiet={empty} f={byField.floor} gain={gains.fields.floor} htmlFor="floor">
                 <input id="floor" type="number" inputMode="numeric" min="0" value={draft.floor} onChange={set("floor")} />
               </Field>
-              <Field f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
+              <Field quiet={empty} f={byField.bedrooms} gain={gains.fields.bedrooms} htmlFor="bedrooms">
                 <select id="bedrooms" value={draft.bedrooms} onChange={set("bedrooms")}>
                   <option value="">Choose</option>
                   <option value="0">Studio</option>
@@ -232,10 +232,10 @@ export default function Checker({ reference }) {
             </div>
 
             <div className="row three">
-              <Field f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
+              <Field quiet={empty} f={byField.bathrooms} gain={gains.fields.bathrooms} htmlFor="bathrooms">
                 <input id="bathrooms" type="number" inputMode="numeric" min="0" value={draft.bathrooms} onChange={set("bathrooms")} />
               </Field>
-              <Field f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
+              <Field quiet={empty} f={byField.furnishing} gain={gains.fields.furnishing} htmlFor="furnishing">
                 <select id="furnishing" value={draft.furnishing} onChange={set("furnishing")}>
                   <option value="">Choose</option>
                   <option value="unfurnished">Unfurnished</option>
@@ -243,7 +243,7 @@ export default function Checker({ reference }) {
                   <option value="fully furnished">Fully furnished</option>
                 </select>
               </Field>
-              <Field f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station"
+              <Field quiet={empty} f={byField.nearest_station} gain={gains.fields.nearest_station} htmlFor="nearest_station"
                 help="The nearest BTS or MRT station. Filled in from our building table when the building is known; type one to override it.">
                 <input id="nearest_station" list="stations" value={draft.nearest_station} onChange={set("nearest_station")} autoComplete="off"
                   placeholder={result.matched.nearest_station && !draft.nearest_station ? result.matched.nearest_station : ""} />
@@ -256,11 +256,11 @@ export default function Checker({ reference }) {
             <legend className="sr-only">Price and photos</legend>
             <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span></div>
             <div className="row">
-              <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)"
+              <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)"
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
                 <input id="monthly_rent_thb" type="number" inputMode="numeric" min="0" step="500" value={draft.monthly_rent_thb} onChange={set("monthly_rent_thb")} />
               </Field>
-              <Field f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos (5 or more)">
+              <Field quiet={empty} f={byField.photo_count} gain={gains.fields.photo_count} htmlFor="photo_count" labelOverride="Number of photos (5 or more)">
                 <input id="photo_count" type="number" inputMode="numeric" min="0" value={draft.photo_count} onChange={set("photo_count")} />
               </Field>
             </div>
@@ -354,9 +354,12 @@ export default function Checker({ reference }) {
   );
 }
 
-function Field({ f, gain, htmlFor, children, hint, help, labelOverride }) {
+function Field({ f, gain, htmlFor, children, hint, help, labelOverride, quiet = false }) {
   const [showHelp, setShowHelp] = useState(false);
   const label = labelOverride ?? f.label;
+  // A blank draft is not twelve mistakes. Messages wait until something has been typed anywhere,
+  // then show for the whole form so an agent who types a title sees what else is missing.
+  const message = f.status !== "ok" && f.message && !quiet ? f.message : f.status === "ok" && f.message ? f.message : null;
   return (
     <div className="field" data-status={f.status}>
       {/* The gain flash lives in the label, which is always there, so it never changes the layout. */}
@@ -371,9 +374,7 @@ function Field({ f, gain, htmlFor, children, hint, help, labelOverride }) {
       </div>
       {children}
       {help && showHelp ? <p id={`${htmlFor}-help`} className="hint">{help}</p> : null}
-      <p className={f.status !== "ok" && f.message ? "fieldmsg" : "hint"}>
-        {f.status !== "ok" && f.message ? f.message : f.status === "ok" && f.message ? f.message : hint ?? ""}
-      </p>
+      <p className={message && f.status !== "ok" ? "fieldmsg" : "hint"}>{message ?? hint ?? ""}</p>
     </div>
   );
 }
