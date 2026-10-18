@@ -471,7 +471,7 @@ p.pv-gap, div.pv-gap { display: block; }
   .export .form-actions button { width: 100%; }
   /* the tab is the surface: no outer card around the listing card and its actions */
   .export.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
-  .listing-card { background: var(--paper); }
+  .export .listing-card { background: var(--paper); }
 }
 @media (max-width: 599px) {
   .demo button { min-height: 40px; padding: 0.35rem 0.7rem; font-size: 0.875rem; }

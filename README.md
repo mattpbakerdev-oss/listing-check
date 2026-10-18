@@ -4,7 +4,7 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 
 **Live:** https://listing-check.vercel.app
 
-![Listing Check at 1280, 1024 and 375 side by side: the stepper in the desktop header, the results pane on the right, the tab bar on the phone](docs/screenshots/pass6-example-light.png)
+![Listing Check at 1280, 1024 and 375 side by side: the stepper in the desktop header, the results pane on the right, the tab bar on the phone](docs/screenshots/pass9-example-light.png)
 
 <img src="docs/screenshots/pass2-phone-check-light.png" alt="Listing Check at 375px wide: the Check tab, with the score ring in the header and Draft, Check, Rewrite and Export tabs along the bottom" width="375">
 

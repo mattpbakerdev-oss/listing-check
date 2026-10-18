@@ -511,3 +511,20 @@ Matt: no box inside the right panel, everything on the panel directly. Done for 
 ## 18 Oct 2026, the pane is white
 
 Matt: the panel should be white so it stands out. The desktop pane now uses the paper token, white in light mode and the card shade in dark, against the off-white canvas, with the left hairline kept and the bar markers' halo matched. Light and dark at 1280: [pass8-pane-white.png](docs/screenshots/pass8-pane-white.png).
+
+## 18 Oct 2026, the design review's eight points
+
+A review of layout and colour against the design brief's own tells: where the page used a default rather than a choice. Eight points, a commit each, about an hour and a half. Sheets, 1280, 1024 and 375 left to right: [empty light](docs/screenshots/pass9-empty-light.png) · [empty dark](docs/screenshots/pass9-empty-dark.png) · [example light](docs/screenshots/pass9-example-light.png) · [example dark](docs/screenshots/pass9-example-dark.png) · [after rewrite light](docs/screenshots/pass9-rewrite-light.png) · [after rewrite dark](docs/screenshots/pass9-rewrite-dark.png). Phone Export: [pass9-phone-export.png](docs/screenshots/pass9-phone-export.png).
+
+1. **One heading system.** The rewrite and export cards now carry "04 AI rewrite" and "05 Export" through the shared heading component, with a purpose line each, so the five cards match the five steps in the stepper. The heading component moved to its own file.
+2. **Eyebrow typography.** The number is the same sans with tabular figures, not mono; a space instead of the middle dot; small caps kept. Mono no longer appears anywhere on the page.
+3. **Demo controls demoted.** "Example draft" and "Mispriced draft" are quiet buttons on every layout. Filled teal is now the rewrite button and "Copy as text" only.
+4. **The pane ends like the phone.** The "Rewrite with AI, below the form" link is gone; the pane ends with "Next: Rewrite" or "Next: Export", the same element the Check tab uses, which also removed a phone-only rule.
+5. **Desktop reading sizes.** Hints, field messages, fix messages, price facts, the building lines and the purpose lines are 14px from 1000px; eyebrows and section heads stay 13px because they are structural.
+6. **The price badge** in the export card is the same quiet chip as "2 to fix", in the band colour, sentence case. The transit line dot keeps the line's real colour, a deliberate exception.
+7. **Phone Export** is the surface: the listing card and the two option cards sit on the tab directly. The card had been inheriting the canvas tint from the base rule, which beat the phone rule on source order; the phone rule is now scoped to the export section.
+8. **The building section in sentences**: "3 minutes' walk on the BTS Sukhumvit line." and "Built 2018, mid-range, 7 listings in our data."
+
+**Counts on the example state at 1280, whole page.** Amber: six, the three chips, the ring, the bar for the listing card, and the verdict's key phrase, which Matt asked for from the goal-progress reference. Teal: fourteen, which is the name, the current step, the five eyebrow numbers, the two primary buttons, the copy-as-text option card, and four links; the numbers are the largest group and are the original brief's teal markers.
+
+**Verified.** 274 tests, `next build` clean, no console errors at 1280, 1024 or 375, no horizontal scroll, scores and rewrites behaving as before (70 to 83 on the example).
