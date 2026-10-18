@@ -12,6 +12,7 @@ import { TABS, tabForTarget, tabStatuses } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 import ResultsPanel from "./results.js";
+import CardHead from "./card-head.js";
 import { ScoreRing } from "./score-ring.js";
 
 const EMPTY = {
@@ -340,20 +341,6 @@ function Field({ f, gain, htmlFor, children, hint, help, labelOverride, quiet = 
   );
 }
 
-// One heading per card, the same on both layouts: a small-caps eyebrow "01 · THE LISTING" with the
-// status mark on the right (green tick when every field in the card is ok, amber "N to fix"
-// otherwise, nothing on a blank draft), and one line on what the card is for.
-function CardHead({ n, title, purpose, chip }) {
-  return (
-    <div className="card-head" aria-hidden="true">
-      <div className="card-head-row">
-        <span className="eyebrow"><span className="marker">{n}</span> · {title}</span>
-        {chip === null ? null : chip === 0 ? <span className="chip" data-tone="ok">✓</span> : <span className="chip" data-tone="warn">{chip} to fix</span>}
-      </div>
-      <p className="card-purpose">{purpose}</p>
-    </div>
-  );
-}
 
 // Five steps under the header. Done, current and to do come from lib/steps.js; a tap scrolls to the card.
 function Stepper({ steps, goTo }) {

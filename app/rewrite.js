@@ -5,6 +5,7 @@ import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { reducer, initialState, progress, acceptedEntries, FIELDS } from "../lib/rewrite/state.js";
 import { projectedGain } from "../lib/rewrite/gain.js";
 import ReviewOverlay from "./review-overlay.js";
+import CardHead from "./card-head.js";
 
 // The Rewrite section is a page in its own right, on phones a whole tab: before a rewrite it shows
 // what will be rewritten and what that is worth; after one it shows the four results, what was
@@ -49,7 +50,7 @@ export default function RewritePanel({ draft, setDraft, canRewrite, onApplied, r
   return (
     <section className="rewrite card" id="rewrite">
       <div className="rewrite-head">
-        <h2>AI rewrite</h2>
+        <CardHead n="04" title="AI rewrite" purpose="Cleaner English and a Thai version, from your draft only." />
         {state.status === "ready" ? (
           <div className="form-actions">
             <button type="button" className="quiet" onClick={() => dispatch({ type: "open" })}>{state.applied ? "Review again" : "Review the rewrite"}</button>

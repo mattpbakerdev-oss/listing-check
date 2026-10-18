@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { listingText, listingJson, leaseLine } from "../lib/export/format.js";
 import { previewModel } from "../lib/preview/model.js";
+import CardHead from "./card-head.js";
 
 // The Export section is the finished listing: a card in a portal's idiom, then the ways to take it
 // away. Gaps stay in their slots, named, so what is exported is what was checked.
@@ -36,7 +37,7 @@ export default function ExportPanel({ draft, result, bench, building, area, verd
 
   return (
     <section className="export card" id="export">
-      <h2>Export</h2>
+      <CardHead n="05" title="Export" purpose="The finished listing, ready to take away." />
       {empty ? (
         <p className="muted">Fill in the draft and the finished listing appears here, ready to copy.</p>
       ) : (
