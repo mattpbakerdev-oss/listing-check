@@ -140,15 +140,16 @@ code { font-size: 0.9em; }
 fieldset { margin: 0; padding: var(--card-pad); display: grid; gap: 1.125rem; min-width: 0; }
 /* The legend is for screen readers only. Safari draws a visible legend on the border line and ignores
    the float trick Chrome honours, so the heading people see is an ordinary block. */
-/* one heading per card: a small mono number, then the title, on one line */
-.card-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.25rem; }
-.card-head .marker { margin-bottom: 0; font-size: 0.8125rem; }
+/* one heading per card: the eyebrow is the heading, with its status on the right and its purpose under it */
+.card-head { display: grid; gap: 0.2rem; margin-bottom: 0.125rem; }
+.card-head-row { display: flex; align-items: center; gap: 0.6rem; min-height: 24px; }
+.eyebrow { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.eyebrow .marker { font-size: 0.8125rem; letter-spacing: 0.08em; }
+.card-purpose { font-size: 0.9375rem; color: var(--muted); }
 .chip { margin-left: auto; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; line-height: 1.4; }
 .chip[data-tone="ok"] { background: var(--ok-soft); color: var(--ok); }
 .chip[data-tone="warn"] { background: var(--warn-soft); color: var(--warn); }
-.card-title { display: block; font-size: 1.0625rem; font-weight: 600; line-height: 1.15; color: var(--ink); }
-@media (max-width: 599px) { .card-title { font-size: 1rem; } }
-/* section marker: "01 · The listing", above the heading */
+@media (max-width: 599px) { /* section marker: "01 · The listing", above the heading */
 .marker { display: inline-block; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: var(--accent); }
 
 button {

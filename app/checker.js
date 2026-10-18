@@ -176,7 +176,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">The listing</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">01</span><span className="card-title">The listing</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[0].fields)} /></div>
+            <CardHead n="01" title="The listing" purpose="What the tenant reads first." chip={empty ? null : fixCount(result.fields, STEPS[0].fields)} />
             <Field quiet={empty} f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
@@ -202,7 +202,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">The unit</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">02</span><span className="card-title">The unit</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[1].fields)} /></div>
+            <CardHead n="02" title="The unit" purpose="Where it is and what it is." chip={empty ? null : fixCount(result.fields, STEPS[1].fields)} />
             <div className="row wide">
               <Field quiet={empty} f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -254,7 +254,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">Price and photos</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">03</span><span className="card-title">Price and photos</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[2].fields)} /></div>
+            <CardHead n="03" title="Price and photos" purpose="What it costs, and what the photos promise." chip={empty ? null : fixCount(result.fields, STEPS[2].fields)} />
             <div className="row">
               <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride={<><span className="phone-only">Rent (THB)</span><span className="desktop-only">Monthly rent (THB)</span></>}
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
@@ -392,11 +392,19 @@ function Field({ f, gain, htmlFor, children, hint, help, labelOverride, quiet = 
   );
 }
 
-// Green tick when every field in the card is ok, amber "N to fix" otherwise. Phones only; on desktop
-// the results column lists the fields.
-function CardChip({ n }) {
-  if (n === null) return null;
-  return n === 0 ? <span className="chip phone-only" data-tone="ok">✓</span> : <span className="chip phone-only" data-tone="warn">{n} to fix</span>;
+// One heading per card, the same on both layouts: a small-caps eyebrow "01 · THE LISTING" with the
+// status mark on the right (green tick when every field in the card is ok, amber "N to fix"
+// otherwise, nothing on a blank draft), and one line on what the card is for.
+function CardHead({ n, title, purpose, chip }) {
+  return (
+    <div className="card-head" aria-hidden="true">
+      <div className="card-head-row">
+        <span className="eyebrow"><span className="marker">{n}</span> · {title}</span>
+        {chip === null ? null : chip === 0 ? <span className="chip" data-tone="ok">✓</span> : <span className="chip" data-tone="warn">{chip} to fix</span>}
+      </div>
+      <p className="card-purpose">{purpose}</p>
+    </div>
+  );
 }
 
 // Five steps under the header. Done, current and to do come from lib/steps.js; a tap scrolls to the card.
