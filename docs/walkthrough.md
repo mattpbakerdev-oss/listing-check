@@ -12,7 +12,7 @@ The last open item from the build order. Record it on a phone-sized window and a
 | Time | On screen | Say |
 |---|---|---|
 | 0:00 | Empty form, "Nothing to check yet" | "Listing Check reads a draft rental listing before it goes live." |
-| 0:05 | Tap Load an example draft | "Here is a typical rushed draft: caps title, two-line description, no floor, three photos. It scores 70." |
+| 0:05 | Tap Example draft | "Here is a typical rushed draft: caps title, two-line description, no floor, three photos. It scores 70." |
 | 0:15 | Check tab on the phone, or the right column | "Every missing field is listed with what to add. The price check compares rent per square metre with similar listings, and names them." |
 | 0:25 | Fix the floor, watch the +8 | "Fix a field and the score moves straight away." |
 | 0:32 | Use the usual terms | "Lease terms are one tap, and they become facts the rewrite may state." |

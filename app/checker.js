@@ -143,28 +143,23 @@ export default function Checker({ reference }) {
         </div>
       </header>
 
-      <section className="intro desktop-only" aria-label="About this tool">
-        <p className="purpose">Check a Bangkok rental listing before it goes live: what is missing, and whether the price makes sense.</p>
-        <p className="notice">
-          Running on sample data generated from public market averages. <a href="/import">Import your listings</a> to run it on your own.
-        </p>
-      </section>
+      <p className="intro desktop-only">Check a Bangkok rental listing before it goes live. Sample data; <a href="/import">import yours</a> to run it on your own.</p>
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-top">
             <div className="form-actions demo">
-              <button type="button" onClick={() => loadDraft(EXAMPLE)}><span className="phone-only">Example</span><span className="desktop-only">Load an example draft</span></button>
-              <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}><span className="phone-only">Mispriced</span><span className="desktop-only">Load a mispriced draft</span></button>
+              <button type="button" onClick={() => loadDraft(EXAMPLE)}><span className="phone-only">Example</span><span className="desktop-only">Example draft</span></button>
+              <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}><span className="phone-only">Mispriced</span><span className="desktop-only">Mispriced draft</span></button>
               {isEmptyDraft(draft) ? null : <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>}
             </div>
 
             {autosave.offer ? (
               <div className="restore-bar" role="status">
-                <span>You have an unfinished draft from {relativeTime(autosave.offer.savedAt, autosave.now)}.</span>
+                <span>Unfinished draft from {relativeTime(autosave.offer.savedAt, autosave.now)}.</span>
                 <span className="form-actions">
-                  <button type="button" onClick={restoreDraft}>Restore</button>
-                  <button type="button" className="quiet" onClick={autosave.discard}>Discard</button>
+                  <button type="button" className="small" onClick={restoreDraft}>Restore</button>
+                  <button type="button" className="quiet small" onClick={autosave.discard}>Discard</button>
                 </span>
               </div>
             ) : (
