@@ -13,7 +13,8 @@ export function ScoreRing({ score, small = false }) {
       <circle className="ring-track" cx="56" cy="56" r={r} fill="none" strokeWidth="8" />
       <circle className="ring-fill" cx="56" cy="56" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
         strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} transform="rotate(-90 56 56)" />
-      <text className="ring-number" x="56" y={small ? "56" : "58"} textAnchor="middle" dominantBaseline="middle">{score}</text>
+      {/* "central" puts the glyph box's true middle on y, so the number sits at the ring's centre whatever the stroke */}
+      <text className="ring-number" x="56" y={small ? "56" : "58"} textAnchor="middle" dominantBaseline="central">{score}</text>
       {small ? null : <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>}
     </svg>
   );

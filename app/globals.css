@@ -100,7 +100,7 @@ code { font-size: 0.9em; }
 .purpose { color: var(--muted); max-width: 60ch; }
 .notice { margin-top: 0.5rem; font-size: 0.875rem; color: var(--muted); padding-left: 0.75rem; border-left: 3px solid var(--rule); max-width: 60ch; }
 .top-row h1 { flex: none; }
-.top-score { display: flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none; min-height: 44px; white-space: nowrap; min-width: 0; overflow: hidden; flex: none; }
+.top-score { display: flex; align-items: center; gap: 0.75rem; color: inherit; text-decoration: none; min-height: 44px; white-space: nowrap; min-width: 0; overflow: hidden; flex: none; }
 .top-score-text { overflow: hidden; text-overflow: ellipsis; font-size: 0.9375rem; }
 .top-score .ring { width: 40px; height: 40px; }
 .field, .results, .rewrite, .export { scroll-margin-top: 68px; }
