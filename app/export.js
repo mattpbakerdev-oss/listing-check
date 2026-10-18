@@ -42,11 +42,17 @@ export default function ExportPanel({ draft, result, bench, building, area, verd
       ) : (
         <>
           <ListingCard draft={draft} result={result} building={building} area={area} verdict={verdict} />
-          <div className="form-actions">
-            <button type="button" onClick={() => copy("text")}>{copied === "text" ? "Copied" : "Copy as text"}</button>
-            <button type="button" className="quiet" onClick={() => copy("json")}>{copied === "json" ? "Copied" : "Copy as JSON"}</button>
-            <button type="button" className="quiet" onClick={download}>Download JSON</button>
+          <div className="option-cards">
+            <button type="button" className="option-card" onClick={() => copy("text")}>
+              <span className="option-title">{copied === "text" ? "Copied" : "Copy as text"}</span>
+              <span className="option-sub">The listing as it reads above, ready to paste into a portal or a chat.</span>
+            </button>
+            <button type="button" className="option-card" onClick={download}>
+              <span className="option-title">Download JSON</span>
+              <span className="option-sub">The listing and the check results, for your own system.</span>
+            </button>
           </div>
+          <p className="hint"><button type="button" className="linklike" onClick={() => copy("json")}>{copied === "json" ? "Copied the JSON" : "Copy as JSON"}</button> instead of downloading it.</p>
           {copied === "failed" ? <p className="fieldmsg">Copying did not work in this browser. Select the text and copy it.</p> : null}
           <p className="export-done" data-tone={result.score >= 85 ? "ok" : "warn"}>
             {result.score >= 85
