@@ -339,7 +339,14 @@ export default function Checker({ reference }) {
             <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
           </section>
 
-          <p className="to-rewrite"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a><span className="desktop-only">, below the form.</span><span className="phone-only"> in the Rewrite tab.</span></p>
+          <p className="to-rewrite desktop-only"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
+          {empty ? null : (
+            <div className="form-actions phone-only">
+              {byField.title.earned < byField.title.points || byField.description.earned < byField.description.points
+                ? <button type="button" onClick={goTo("rewrite")}>Next: Rewrite</button>
+                : <button type="button" onClick={goTo("export")}>Next: Export</button>}
+            </div>
+          )}
         </aside>
       </div>
 
