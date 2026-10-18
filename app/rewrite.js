@@ -61,7 +61,6 @@ export default function RewritePanel({ draft, setDraft, canRewrite, onApplied, r
 
       {state.status !== "ready" ? (
         <>
-          <p className="muted">Cleaner English and a Thai version, written only from the facts in your draft and the building record.</p>
           <div className="rw-preview" aria-label="What will be rewritten">
             <p className="rw-caption">Your title</p>
             <p className="rw-dim">{draft.title.trim() || <span className="muted">Empty</span>}</p>
