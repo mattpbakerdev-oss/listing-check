@@ -344,7 +344,7 @@ export default function Checker({ reference }) {
       </div>
 
       <div className="layout single">
-        <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
+        <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} result={result} onNext={goTo("export")} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
         <ExportPanel draft={draft} result={result} onExported={() => setExported(true)} onPreview={() => setPreview("preview-button")} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 

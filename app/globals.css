@@ -277,6 +277,17 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .rw-compare { display: grid; gap: 0.75rem; }
 @media (min-width: 700px) { .rw-compare { grid-template-columns: 1fr 1fr; gap: 1.5rem; } }
 .rw-caption { font-size: 0.8125rem; color: var(--muted); }
+/* the Rewrite page: what will be rewritten, dimmed; then the results as compact before/after rows */
+.rw-preview { display: grid; gap: 0.25rem; }
+.rw-preview .rw-caption + .rw-dim { margin-bottom: 0.5rem; }
+.rw-dim { color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.rw-gain { font-size: 0.9375rem; }
+.rw-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.rw-rows li { display: grid; gap: 0.25rem; padding: 0.6rem 0.75rem; border: 1px solid var(--rule); border-radius: var(--radius); }
+.rw-rows li[data-accepted="true"] { background: var(--ok-soft); border-color: transparent; }
+.rw-row-head { font-weight: 500; font-size: 0.9375rem; }
+.rw-rows .rw-dim { font-size: 0.875rem; text-decoration: line-through; text-decoration-color: var(--rule-strong); }
+.rw-after { white-space: pre-wrap; overflow-wrap: anywhere; }
 .rw-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid var(--warn); padding: 0 0.1em; }
 .rw-confirm { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.9375rem; color: var(--warn); }
