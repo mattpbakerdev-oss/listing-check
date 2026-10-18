@@ -5,14 +5,15 @@ import { reducer as autosaveReducer, initialState as autosaveInitial, isEmptyDra
 import { readDraft, writeDraft, removeDraft } from "../lib/drafts/storage.js";
 import { scoreListing } from "../lib/completeness/score.js";
 import { num } from "../lib/completeness/rules.js";
-import { band, basisLabel, shortVerdict, MIN_COMPARABLES, proximityNote } from "../lib/benchmark/bands.js";
+import { band, MIN_COMPARABLES } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
-import { lineFor } from "../lib/stations.js";
 import { STEPS, stepStatuses, fixCount } from "../lib/steps.js";
 import { TABS, tabForTarget, tabStatuses } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 import PreviewOverlay from "./preview.js";
+import ResultsPanel from "./results.js";
+import { ScoreRing } from "./score-ring.js";
 
 const EMPTY = {
   title: "", description: "", description_th: "", title_th: "", building: "", area: "", size_sqm: "", floor: "",
@@ -295,52 +296,8 @@ export default function Checker({ reference }) {
           <datalist id="stations">{[...new Set(reference.buildings.map((b) => b.nearest_station))].sort().map((s) => <option key={s} value={s} />)}</datalist>
         </form>
 
-        <aside className="results" id="results">
-          <section className="score card tinted">
-            <div className="score-hero">
-              <ScoreRing score={result.score} />
-              <div>
-                <p className="score-word" data-band={empty ? "empty" : scoreBand(result.score)}>{empty ? "Nothing to check yet" : scoreWord(result.score)}</p>
-                <p className="score-sub">{empty ? "Start with the title, or load an example draft." : problems.length === 0 ? "Nothing missing." : `${problems.length} field${problems.length === 1 ? "" : "s"} to fix.`}</p>
-              </div>
-            </div>
-            <ScoreBar fields={result.fields} />
-            {empty ? null : problems.length === 0 ? (
-              <p className="allgood">Every field is complete. Check the price below, then publish.</p>
-            ) : (
-              <ul className="problems">
-                {problems.map((f) => (
-                  <li key={f.field} data-status={f.status}>
-                    <a href={`#${f.field}`}>{f.label}</a>
-                    <span className="pts">{formatPts(f.earned)}/{f.points}</span>
-                    <span className="msg">{f.message}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {empty ? null : (
-              <div className="form-actions">
-                <button type="button" className="quiet" id="preview-button-results" onClick={() => setPreview("preview-button-results")}>Preview as a listing</button>
-              </div>
-            )}
-          </section>
-
-          <BuildingCard building={matchedBuilding} />
-
-          <section className="bench card tinted">
-            <h2>Price check</h2>
-            <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
-          </section>
-
-          <p className="to-rewrite desktop-only"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
-          {empty ? null : (
-            <div className="form-actions phone-only">
-              {byField.title.earned < byField.title.points || byField.description.earned < byField.description.points
-                ? <button type="button" onClick={goTo("rewrite")}>Next: Rewrite</button>
-                : <button type="button" onClick={goTo("export")}>Next: Export</button>}
-            </div>
-          )}
-        </aside>
+        <ResultsPanel result={result} problems={problems} empty={empty} gain={gains.total} bench={bench} draft={draft} reference={reference}
+          building={matchedBuilding} byField={byField} goTo={goTo} onPreview={() => setPreview("preview-button-results")} />
       </div>
 
       <div className="layout single">
@@ -426,115 +383,12 @@ function Stepper({ steps, goTo }) {
   );
 }
 
-// Red under 60, amber 60 to 84, green 85 and over. The same three tones as the price verdict.
-export const scoreBand = (s) => (s >= 85 ? "high" : s >= 60 ? "mid" : "low");
-const scoreWord = (s) => (s >= 85 ? "Ready to publish" : s >= 60 ? "Nearly there" : "Needs work");
-
-// What we know about the matched building, from our own tables only. Hidden until a building matches.
-const TIER_WORD = { luxury: "Luxury", mid: "Mid-range", budget: "Budget" };
-
-function BuildingCard({ building }) {
-  if (!building) return null;
-  const line = lineFor(building.nearest_station);
-  const year = building.completed_year;
-  const age = year ? new Date().getFullYear() - year : null;
-  return (
-    <section className="building-card card" aria-label={`About ${building.building_name}`}>
-      <h2>{building.building_name}</h2>
-      <p className="building-line">
-        {line?.colour ? <span className="line-dot" style={{ background: line.colour }} aria-hidden="true" /> : null}
-        <span>{building.nearest_station}</span>
-      </p>
-      <p className="building-facts muted">
-        {[line?.name, building.walk_min ? `${building.walk_min} min walk` : null].filter(Boolean).join(" · ")}
-      </p>
-      <p className="building-facts muted">
-        {[
-          year ? `Completed ${year}${age !== null ? ` (${age} year${age === 1 ? "" : "s"} old)` : ""}` : null,
-          building.tier ? TIER_WORD[building.tier] ?? building.tier : null,
-          `${building.listing_count ?? 0} listing${building.listing_count === 1 ? "" : "s"} in our data`,
-        ].filter(Boolean).join(" · ")}
-      </p>
-    </section>
-  );
-}
 
 
-// A ring that fills by score, with the number inside. `small` is the 40px header version.
-function ScoreRing({ score, small = false }) {
-  const r = 48, c = 2 * Math.PI * r;
-  return (
-    <svg className="ring" viewBox="0 0 112 112" role="img" aria-label={`Score ${score} of 100`} data-band={scoreBand(score)} data-size={small ? "small" : "large"}>
-      <circle className="ring-track" cx="56" cy="56" r={r} fill="none" strokeWidth="8" />
-      <circle className="ring-fill" cx="56" cy="56" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} transform="rotate(-90 56 56)" />
-      <text className="ring-number" x="56" y={small ? "56" : "58"} textAnchor="middle" dominantBaseline="middle">{score}</text>
-      {small ? null : <text className="ring-of" x="56" y="80" textAnchor="middle">of 100</text>}
-    </svg>
-  );
-}
 
-// Twelve segments, each as wide as the points it is worth, filled by what the draft earned.
-function ScoreBar({ fields }) {
-  return (
-    <div className="bar" role="img" aria-label={fields.map((f) => `${f.label} ${formatPts(f.earned)} of ${f.points}`).join(", ")}>
-      {fields.map((f) => (
-        <div key={f.field} className="seg" style={{ flexGrow: f.points }} data-status={f.status} title={`${f.label}: ${formatPts(f.earned)} of ${f.points}`}>
-          <div className="fill" style={{ width: `${(f.earned / f.points) * 100}%` }} />
-        </div>
-      ))}
-    </div>
-  );
-}
 
-function Benchmark({ bench, draft, result, reference }) {
-  if (bench.status === "bad_rent") return <p className="muted">Fix the rent first, then the price check will run.</p>;
-  if (bench.status === "bad_size") return <p className="muted">Fix the size first, then the price check will run.</p>;
-  if (bench.status === "idle") {
-    return <p className="muted">Add the rent, the size and a known building or area to compare the price with the market.</p>;
-  }
-  if (bench.status === "loading") return <p className="muted">Comparing with the market…</p>;
-  if (bench.status === "error") return <p className="muted">The price check is not available right now. {bench.error}</p>;
 
-  const building = reference.buildings.find((b) => b.building_id === result.matched.building_id);
-  const areaId = result.matched.area_id ?? building?.area_id;
-  const area = reference.areas.find((a) => a.area_id === areaId);
 
-  if (bench.status === "none" || bench.data.n < MIN_COMPARABLES) {
-    return (
-      <div className="bench-body" data-tone="none">
-        <p className="verdict"><strong>Not enough similar listings to judge</strong></p>
-        <dl className="bench-facts">
-          {bench.status === "ready" ? <div><dt>This listing</dt><dd>{baht(bench.data.listing_rent_per_sqm)} per sqm</dd></div> : null}
-          {area ? <div><dt>Rents in {area.area_name} usually run</dt><dd>{baht(area.rent_sqm_low)} to {baht(area.rent_sqm_high)} per sqm</dd></div> : null}
-          {area ? <div><dt>Typical 1-bed rent in {area.area_name}</dt><dd>{baht(area.one_bed_typical)} a month</dd></div> : null}
-        </dl>
-        <p className="hint">A verdict needs at least {MIN_COMPARABLES} comparable listings. {bench.status === "ready" ? `There are ${bench.data.n}.` : "There are none yet."}</p>
-      </div>
-    );
-  }
-
-  const d = bench.data;
-  const verdict = band(d.pct_diff);
-  const pct = Number(d.pct_diff);
-  const basis = basisLabel(d.basis, { buildingName: building?.building_name, areaName: area?.area_name, tier: building?.tier, bedrooms: num(draft.bedrooms) });
-
-  return (
-    <div className="bench-body" data-tone={verdict.tone}>
-      <p className="verdict">
-        <strong>{verdict.label[0].toUpperCase() + verdict.label.slice(1)}</strong>
-        {Math.abs(pct) > 10 ? <span>, {Math.abs(pct).toFixed(0)}% {pct > 0 ? "above" : "below"} the median</span> : null}
-      </p>
-      {verdict.tone === "note" ? <p className="hint">Medians from a few hundred listings are rough. A difference this size is worth a look, not an alarm.</p> : null}
-      <dl className="bench-facts">
-        <div><dt>This listing</dt><dd>{baht(d.listing_rent_per_sqm)} per sqm</dd></div>
-        <div><dt>Median for {basis}</dt><dd>{baht(d.median_rent_per_sqm)} per sqm, from {d.n} listings</dd></div>
-        {area ? <div><dt>Typical 1-bed rent in {area.area_name}</dt><dd>{baht(area.one_bed_typical)} a month</dd></div> : null}
-      </dl>
-      {proximityNote(building) ? <p className="hint">{proximityNote(building)}</p> : null}
-    </div>
-  );
-}
 
 // Saves the form to localStorage 800 ms after it stops changing, offers a saved draft back when
 // the page loads empty, and keeps a clock for the "Draft saved · 2 minutes ago" line.

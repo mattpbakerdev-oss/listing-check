@@ -222,6 +222,22 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .score-word[data-band="high"] { color: var(--ok); }
 .score-word[data-band="empty"] { color: var(--muted); }
 .score-sub { color: var(--muted); font-size: 0.9375rem; margin-top: 0.25rem; }
+.score-word { font-size: 1.0625rem; }
+.gain-chip { display: inline-block; margin-bottom: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--ok-soft); color: var(--ok); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 3s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .gain-chip { animation: none; } }
+/* what shaped it: a bar per card */
+.shaped { display: grid; gap: 0.5rem; }
+.shaped-head { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.bars li { display: grid; grid-template-columns: 8.5rem 1fr auto; align-items: center; gap: 0.75rem; font-size: 0.9375rem; }
+.bars a { color: var(--ink); text-decoration: none; font-weight: 500; }
+.bars a:hover { text-decoration: underline; }
+.bar-track { display: block; height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 4px; background: var(--ok); }
+.bar-fill[data-band="mid"] { background: var(--warn); }
+.bar-fill[data-band="low"] { background: var(--alert); }
+.bar-num { font-variant-numeric: tabular-nums; font-size: 0.875rem; }
+@media (max-width: 599px) { .bars li { grid-template-columns: 6.5rem 1fr auto; font-size: 0.875rem; } }
 
 .bar { display: flex; gap: 3px; height: 12px; }
 .seg { flex-basis: 0; background: var(--rule); border-radius: 2px; overflow: hidden; }
