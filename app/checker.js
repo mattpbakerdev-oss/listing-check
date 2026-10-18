@@ -21,6 +21,7 @@ const EMPTY = {
   contract_months: "", deposit_months: "", advance_months: "",
 };
 const USUAL_TERMS = { contract_months: "12", deposit_months: "2", advance_months: "1" };
+const LEASE_FIELDS = Object.keys(USUAL_TERMS);
 
 // A rushed draft with a fair price: caps title, thin description, no floor or bathrooms, three photos.
 // Rhythm Rangnam 1-beds at 28 sqm for 17,000 sit on the median for mid-tier Ratchathewi (sample L0036).
@@ -78,7 +79,8 @@ export default function Checker({ reference }) {
   const gains = useGains(result);
   const compact = useCompactHeader();
   const steps = stepStatuses(result.fields, { applied, exported });
-  const empty = isEmptyDraft(draft);
+  // Lease terms are not scored, so terms alone leave the results in their empty state.
+  const empty = isEmptyDraft(draft, LEASE_FIELDS);
 
   const set = (field) => (e) => setDraft((d) => ({ ...d, [field]: e.target.value }));
   const problems = result.fields.filter((f) => f.status !== "ok");
