@@ -507,3 +507,7 @@ Matt: no box inside the right panel, everything on the panel directly. Done for 
 **A bug Matt's screenshot showed and the sheets had hidden.** The empty state had a hundred pixels of air between the ring and the price check and a heading eighty pixels tall. The pane has a fixed height, its grid child stretched to fill it, and the grid spread the spare height across the sections and then across their children. The earlier example-state sheets looked fine only because that state's content already filled the pane. Fixed by start-aligning the pane, the card and each section. Measured in the empty state: the score section 112px, the price heading 18px; in the example state every section at its content height.
 
 **Verified.** 274 tests, `next build` clean, no console errors, no horizontal scroll at 375.
+
+## 18 Oct 2026, the pane is white
+
+Matt: the panel should be white so it stands out. The desktop pane now uses the paper token, white in light mode and the card shade in dark, against the off-white canvas, with the left hairline kept and the bar markers' halo matched. Light and dark at 1280: [pass8-pane-white.png](docs/screenshots/pass8-pane-white.png).

@@ -140,13 +140,13 @@ code { font-size: 0.9em; }
   .main-col { padding: 1.5rem; max-width: 880px; width: 100%; justify-self: center; }
   .results {
     position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; align-self: start;
-    background: var(--sunk); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
+    background: var(--paper); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
   }
   /* no box inside the pane: the sections sit directly on it. The pane has a fixed height, so its
      content must align to the start or the grid spreads the spare height across the sections. */
   .results { display: grid; align-content: start; }
   .results .results-card { background: transparent; border: 0; box-shadow: none; padding: 0; align-content: start; }
-  .results .bar-fill::after { box-shadow: 0 0 0 2px var(--sunk); }
+  .results .bar-fill::after { box-shadow: 0 0 0 2px var(--paper); }
 }
 @media (min-width: 1280px) { .layout { grid-template-columns: minmax(0, 1fr) 480px; } }
 @media (min-width: 1362px) { .results { border-right: 1px solid var(--rule); } }
