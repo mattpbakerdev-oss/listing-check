@@ -77,7 +77,7 @@ export default function Checker({ reference }) {
   const result = useMemo(() => scoreListing(draft, reference), [draft, reference]);
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
-  const gains = useGains(result);
+  const gains = useGains(result, session);
   const filled = new Set(Object.entries(draft).filter(([, v]) => String(v ?? "").trim() !== "").map(([k]) => k));
   const steps = stepStatuses(result.fields, { applied, exported, filled });
   // Lease terms are not scored, so terms alone leave the results in their empty state.
@@ -476,9 +476,13 @@ function useBenchmark(draft, result, reference, byField) {
 // "+6" rather than a flicker of "+0.3" per keystroke. Each gain clears itself after 3 s.
 const GAIN_SHOW_MS = 3000;
 
-function useGains(result) {
+function useGains(result, session) {
   const settled = useRef(null);
   const [gains, setGains] = useState({ fields: {}, total: null });
+
+  // A replaced draft (example, restore, clear) is a new baseline, not a gain. This effect is declared
+  // first so it runs before the one below in the same render.
+  useEffect(() => { settled.current = null; setGains({ fields: {}, total: null }); }, [session]);
 
   useEffect(() => {
     const now = Object.fromEntries(result.fields.map((f) => [f.field, f.earned]));
@@ -495,7 +499,9 @@ function useGains(result) {
       }
       if (Object.keys(fresh).length === 0) return;
       const key = Date.now();
-      const totalGain = total >= 0.5 ? { amount: Math.round(total), key } : null;
+      // The total chip only when there was a score to rise from: never on a first fill of a blank form.
+      const prevTotal = Object.values(prev).reduce((a, b) => a + b, 0);
+      const totalGain = total >= 0.5 && prevTotal > 0 ? { amount: Math.round(total), key } : null;
       setGains((old) => ({ fields: { ...old.fields, ...fresh }, total: totalGain ?? old.total }));
       setTimeout(() => {
         setGains((old) => {
