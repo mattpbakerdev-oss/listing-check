@@ -6,7 +6,7 @@ Check a Bangkok rental listing before it goes live: what is missing, whether the
 
 ![Listing Check on a laptop: five steps across the top, the form in cards on the left, the score ring and price check on the right](docs/screenshots/steps-desktop-light.png)
 
-<img src="docs/screenshots/tabs-mobile-draft.png" alt="Listing Check at 375px wide: the Draft tab, with Draft, Check, Rewrite and Export tabs along the bottom" width="375">
+<img src="docs/screenshots/after-phone-check.png" alt="Listing Check at 375px wide: the Check tab, with the score ring in the header and Draft, Check, Rewrite and Export tabs along the bottom" width="375">
 
 ## What it does
 
@@ -34,7 +34,7 @@ How it was measured, and what went wrong along the way, is in [BUILD_LOG.md](BUI
 ## How to run it
 
 Copy `.env.example` to `.env.local` with your Supabase URL and keys, then `npm install && npm run dev` and open http://localhost:3000.
-`npm test` runs the 260 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above. The walkthrough script is in [docs/walkthrough.md](docs/walkthrough.md).
+`npm test` runs the 261 unit tests; `npm run check` verifies the benchmark against the database; `npm run metric` reproduces the table above. The walkthrough script is in [docs/walkthrough.md](docs/walkthrough.md).
 
 ## Stack
 
