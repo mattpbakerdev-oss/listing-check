@@ -142,7 +142,11 @@ code { font-size: 0.9em; }
     position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; align-self: start;
     background: var(--sunk); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
   }
-  .results .card { background: var(--sunk-card); padding: 20px; box-shadow: none; }
+  /* no box inside the pane: the sections sit directly on it. The pane has a fixed height, so its
+     content must align to the start or the grid spreads the spare height across the sections. */
+  .results { display: grid; align-content: start; }
+  .results .results-card { background: transparent; border: 0; box-shadow: none; padding: 0; align-content: start; }
+  .results .bar-fill::after { box-shadow: 0 0 0 2px var(--sunk); }
 }
 @media (min-width: 1280px) { .layout { grid-template-columns: minmax(0, 1fr) 480px; } }
 @media (min-width: 1362px) { .results { border-right: 1px solid var(--rule); } }
@@ -222,9 +226,9 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 /* results: the tool's voice, tinted cards */
 .results { display: grid; gap: 1rem; }
 /* the results: one card, its sections 24px apart with a hairline between each, no boxes inside */
-.results-card { display: grid; gap: 0; }
+.results-card { display: grid; gap: 0; align-content: start; }
 .rs + .rs { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
-.rs { display: grid; gap: 0.75rem; }
+.rs { display: grid; gap: 0.75rem; align-content: start; }
 .rs-head { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .score-hero { display: flex; align-items: center; gap: 1rem; }
 .verdict-key { font-weight: 600; color: var(--ink); }
