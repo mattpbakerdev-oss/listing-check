@@ -8,7 +8,7 @@ import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, shortVerdict, MIN_COMPARABLES, proximityNote } from "../lib/benchmark/bands.js";
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { lineFor } from "../lib/stations.js";
-import { stepStatuses } from "../lib/steps.js";
+import { STEPS, stepStatuses, fixCount } from "../lib/steps.js";
 import { TABS, tabForTarget } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
@@ -141,10 +141,9 @@ export default function Checker({ reference }) {
             </ol>
             <a className="top-score" href="#results" onClick={jumpToResults} aria-label={`Score ${result.score} of 100. Jump to the results.`}>
               <ScoreRing score={result.score} small />
-              {gains.total ? <span className="gain" key={gains.total.key} aria-live="polite">+{gains.total.amount}</span> : null}
               <span className="top-score-text">
                 {empty ? "empty" : problems.length === 0 ? "complete" : `${problems.length} to fix`}
-                {verdict ? ` · ${shortVerdict(verdict)}` : ""}
+                {verdict ? <span className="desktop-only"> · {shortVerdict(verdict)}</span> : null}
               </span>
             </a>
           </div>
@@ -156,7 +155,6 @@ export default function Checker({ reference }) {
       </header>
 
       <Stepper steps={steps} goTo={goTo} />
-      <p className="phone-note phone-only">Sample data. <a href="/import">Import your listings</a> to run it on your own.</p>
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -175,14 +173,17 @@ export default function Checker({ reference }) {
                   <button type="button" className="quiet" onClick={autosave.discard}>Discard</button>
                 </span>
               </div>
-            ) : autosave.savedAt ? (
-              <p className="saved-line" aria-live="polite">Draft saved · {relativeTime(autosave.savedAt, autosave.now)}</p>
-            ) : null}
+            ) : (
+              <p className="saved-line" aria-live="polite">
+                <span className="phone-only"><a href="/import" className="plain">Sample data</a>{autosave.savedAt ? " · " : ""}</span>
+                {autosave.savedAt ? <>Draft saved<span className="desktop-only"> ·</span> {relativeTime(autosave.savedAt, autosave.now)}</> : null}
+              </p>
+            )}
           </div>
 
           <fieldset className="card">
             <legend className="sr-only">The listing</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">01 · The listing</span><span className="card-title">The listing</span></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">01 · The listing</span><span className="card-title">The listing</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[0].fields)} /></div>
             <Field quiet={empty} f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
@@ -208,7 +209,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">The unit</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[1].fields)} /></div>
             <div className="row wide">
               <Field quiet={empty} f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -260,7 +261,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">Price and photos</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[2].fields)} /></div>
             <div className="row">
               <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride={<><span className="phone-only">Rent (THB)</span><span className="desktop-only">Monthly rent (THB)</span></>}
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
@@ -385,6 +386,13 @@ function Field({ f, gain, htmlFor, children, hint, help, labelOverride, quiet = 
       <p className={message && f.status !== "ok" ? "fieldmsg" : "hint"}>{message ?? hint ?? ""}</p>
     </div>
   );
+}
+
+// Green tick when every field in the card is ok, amber "N to fix" otherwise. Phones only; on desktop
+// the results column lists the fields.
+function CardChip({ n }) {
+  if (n === null) return null;
+  return n === 0 ? <span className="chip phone-only" data-tone="ok">✓</span> : <span className="chip phone-only" data-tone="warn">{n} to fix</span>;
 }
 
 // Five steps under the header. Done, current and to do come from lib/steps.js; a tap scrolls to the card.
