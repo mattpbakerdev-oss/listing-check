@@ -9,7 +9,7 @@ import { band, basisLabel, shortVerdict, MIN_COMPARABLES, proximityNote } from "
 import { supabaseBrowser } from "../lib/supabase/browser.js";
 import { lineFor } from "../lib/stations.js";
 import { STEPS, stepStatuses, fixCount } from "../lib/steps.js";
-import { TABS, tabForTarget } from "../lib/tabs.js";
+import { TABS, tabForTarget, tabStatuses } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 import PreviewOverlay from "./preview.js";
@@ -352,12 +352,16 @@ export default function Checker({ reference }) {
         draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} />
 
       <nav className="tabbar" aria-label="Sections">
-        {TABS.map((t) => (
-          <button type="button" key={t.id} className="tab" aria-current={tab === t.id ? "page" : undefined} onClick={() => { setTab(t.id); window.scrollTo({ top: 0 }); }}>
-            {t.label}
-            {t.id === "check" && !empty && problems.length ? <span className="tab-count" aria-label={`${problems.length} to fix`}>{problems.length}</span> : null}
-          </button>
-        ))}
+        {TABS.map((t) => {
+          const mark = empty ? "none" : tabStatuses(steps)[t.id];
+          return (
+            <button type="button" key={t.id} className="tab" aria-current={tab === t.id ? "page" : undefined} onClick={() => { setTab(t.id); window.scrollTo({ top: 0 }); }}>
+              {t.label}
+              {mark === "done" ? <span className="tab-mark" data-tone="ok" aria-label="done">✓</span> : mark === "partial" ? <span className="tab-mark" data-tone="warn" aria-label="started" /> : null}
+              {t.id === "check" && !empty && problems.length ? <span className="tab-count" aria-label={`${problems.length} to fix`}>{problems.length}</span> : null}
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

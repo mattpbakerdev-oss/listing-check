@@ -397,6 +397,9 @@ p.pv-gap, div.pv-gap { display: block; }
   .tab[aria-current="page"]::before { content: ""; position: absolute; inset: 9px 10px; border-radius: 8px; background: var(--well); z-index: -1; }
   .tab:hover:not(:disabled) { filter: none; }
   @media (hover: hover) { .tab:hover:not(:disabled) { background: var(--well); } }
+  .tab-mark { position: absolute; top: 6px; right: calc(50% - 36px); font-size: 0.6875rem; font-weight: 700; line-height: 1; }
+  .tab-mark[data-tone="ok"] { color: var(--ok); }
+  .tab-mark[data-tone="warn"] { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); top: 9px; }
   .tab-count { position: absolute; top: 4px; right: calc(50% - 44px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--warn); color: #fff; font-size: 0.6875rem; font-weight: 600; display: grid; place-items: center; }
   .foot { padding-bottom: 1rem; }
 }
