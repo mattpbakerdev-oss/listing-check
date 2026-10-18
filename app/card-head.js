@@ -7,7 +7,7 @@ export default function CardHead({ n, title, purpose, chip }) {
   return (
     <div className="card-head" aria-hidden="true">
       <div className="card-head-row">
-        <span className="eyebrow"><span className="marker">{n}</span> · {title}</span>
+        <span className="eyebrow"><span className="marker">{n}</span> {title}</span>
         {chip === null || chip === undefined ? null : chip === 0 ? <span className="chip" data-tone="ok">✓</span> : <span className="chip" data-tone="warn">{chip} to fix</span>}
       </div>
       <p className="card-purpose">{purpose}</p>
