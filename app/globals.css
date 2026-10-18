@@ -15,6 +15,8 @@
   --accent-fill: #0e6b7a;      /* behind white text: buttons, the current step */
   --accent-ink: #ffffff;
   --tint: #f5f9fa;            /* teal at 4% over white: the tool's voice */
+  --sunk: #eef0ee;            /* the results pane: one step below the canvas */
+  --sunk-card: #ffffff;
   --focus: #0e6b7a;
   --focus-ring: rgba(14, 107, 122, 0.22);
   --shadow: 0 1px 2px rgba(22, 30, 28, 0.05);
@@ -45,6 +47,8 @@
     --accent-fill: #1f7f90;
     --accent-ink: #ffffff;
     --tint: #1f272c;
+    --sunk: #1a1f23;            /* dark: the pane sits a step above the canvas, its cards a step above that */
+    --sunk-card: #20262c;
     --focus: #4fb3c4;
     --focus-ring: rgba(79, 179, 196, 0.3);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -58,7 +62,7 @@
   }
 }
 
-@media (min-width: 900px) { :root { --card-pad: 24px; } }
+@media (min-width: 1000px) { :root { --card-pad: 24px; } }
 
 * { box-sizing: border-box; }
 
@@ -93,8 +97,7 @@ code { font-size: 0.9em; }
 .top-row { display: flex; align-items: center; gap: 1rem; min-height: 44px; }
 .top h1 { font-size: 1.125rem; flex: none; }
 /* one line under the header on desktop: what it is, and that it runs on sample data */
-.intro { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 0; color: var(--muted); font-size: 0.9375rem; }
-@media (min-width: 900px) { .intro { padding: 1rem 1.5rem 0; } }
+.intro { color: var(--muted); font-size: 0.9375rem; }
 .top h1 { color: var(--accent); }
 .top h1 a.plain { color: inherit; }
 .purpose { color: var(--muted); max-width: 60ch; }
@@ -128,14 +131,20 @@ code { font-size: 0.9em; }
 }
 .top-score { margin-left: auto; }
 
-/* layout: 16px between cards everywhere */
-.layout { display: grid; gap: 1rem; padding: 1rem 1rem 0; max-width: 1100px; margin: 0 auto; }
-.layout.single { grid-template-columns: 1fr; }
-@media (min-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); gap: 1rem 2.5rem; padding: 1.5rem 1.5rem 0; }
-  .layout.single { padding-top: 1rem; }
-  .results { position: sticky; top: 68px; align-self: start; }
+/* layout: 16px between cards everywhere. From 1000px the results are a full-height pane on the right,
+   sticky under the header with its own scroll; the form column keeps its width and the page widens. */
+.layout { display: grid; gap: 1rem; padding: 1rem 1rem 0; }
+.main-col { display: grid; gap: 1rem; min-width: 0; }
+@media (min-width: 1000px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 0; padding: 0; }
+  .main-col { padding: 1.5rem; max-width: 800px; width: 100%; justify-self: center; }
+  .results {
+    position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; align-self: start;
+    background: var(--sunk); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
+  }
+  .results .card { background: var(--sunk-card); padding: 20px; box-shadow: none; }
 }
+@media (min-width: 1280px) { .layout { grid-template-columns: minmax(0, 1fr) 400px; } }
 
 /* form */
 .form { display: grid; gap: 1rem; }
@@ -338,7 +347,7 @@ mark { background: var(--warn-soft); color: inherit; border-bottom: 2px solid va
 
 /* footer and 404 */
 .foot { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 2.5rem; font-size: 0.875rem; color: var(--muted); }
-@media (min-width: 900px) { .foot { padding: 2rem 1.5rem 2.5rem; } }
+@media (min-width: 1000px) { .foot { padding: 2rem 1.5rem 2.5rem; } }
 .notfound section { display: grid; gap: 0.5rem; }
 .notfound h2 { font-size: 1.25rem; }
 
@@ -392,11 +401,11 @@ th { font-weight: 500; color: var(--muted); }
 .pv-gap { display: inline-block; padding: 0.2rem 0.6rem; border: 1.5px dashed var(--rule-strong); border-radius: var(--radius); color: var(--muted); font-size: 0.875rem; font-weight: 500; }
 p.pv-gap, div.pv-gap { display: block; }
 
-/* phone tabs: under 900px the one screen is four tabs with a fixed bar at the bottom. Sections are
+/* phone tabs: under 1000px the one screen is four tabs with a fixed bar at the bottom. Sections are
    hidden, not unmounted, so the draft and any rewrite in progress survive a switch. Desktop shows all. */
 .tabbar { display: none; }
 .phone-only { display: none; }
-@media (max-width: 767px) {
+@media (max-width: 999px) {
   /* room for the bar under everything including the footer, which sits outside .app: the bar is 56px,
      plus the home-indicator inset, plus a little air */
   body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px); }
@@ -404,7 +413,6 @@ p.pv-gap, div.pv-gap { display: block; }
   .app[data-tab="check"] .form, .app[data-tab="check"] .rewrite, .app[data-tab="check"] .export, .app[data-tab="check"] .stepper-wrap { display: none; }
   .app[data-tab="rewrite"] .form, .app[data-tab="rewrite"] .results, .app[data-tab="rewrite"] .export, .app[data-tab="rewrite"] .stepper-wrap { display: none; }
   .app[data-tab="export"] .form, .app[data-tab="export"] .results, .app[data-tab="export"] .rewrite, .app[data-tab="export"] .stepper-wrap { display: none; }
-  .app:not([data-tab="draft"]) .layout { padding-top: 1rem; }
   .tabbar {
     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
     background: var(--paper); border-top: 1px solid var(--rule-strong); padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -429,7 +437,7 @@ p.pv-gap, div.pv-gap { display: block; }
 
 /* phones: the header is one line from the start, the stepper one row, the demo controls small and
    quiet, the restore prompt slim, the export buttons a grid. Desktop keeps the approved layout. */
-@media (max-width: 767px) {
+@media (max-width: 999px) {
   .phone-only { display: revert; }
   .desktop-only { display: none; }
   .stepper-wrap { display: none; } /* one navigation on phones: the tab bar */

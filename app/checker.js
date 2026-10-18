@@ -11,7 +11,6 @@ import { STEPS, stepStatuses, fixCount } from "../lib/steps.js";
 import { TABS, tabForTarget, tabStatuses } from "../lib/tabs.js";
 import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
-import PreviewOverlay from "./preview.js";
 import ResultsPanel from "./results.js";
 import { ScoreRing } from "./score-ring.js";
 
@@ -66,7 +65,6 @@ export default function Checker({ reference }) {
   // Steps 4 and 5 of the stepper: a rewrite has been applied, the listing has been copied or downloaded.
   const [applied, setApplied] = useState(false);
   const [exported, setExported] = useState(false);
-  const [preview, setPreview] = useState(null); // id of the button that opened it, for focus return
   // Phone tabs. Desktop ignores this: the CSS only hides sections under 900px.
   const [tab, setTab] = useState("draft");
   const [pendingScroll, setPendingScroll] = useState(null);
@@ -143,9 +141,10 @@ export default function Checker({ reference }) {
         </div>
       </header>
 
-      <p className="intro desktop-only">Check a Bangkok rental listing before it goes live. Sample data; <a href="/import">import yours</a> to run it on your own.</p>
 
       <div className="layout">
+        <div className="main-col">
+        <p className="intro desktop-only">Check a Bangkok rental listing before it goes live. Sample data; <a href="/import">import yours</a> to run it on your own.</p>
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-top">
             <div className="form-actions demo">
@@ -291,17 +290,14 @@ export default function Checker({ reference }) {
           <datalist id="stations">{[...new Set(reference.buildings.map((b) => b.nearest_station))].sort().map((s) => <option key={s} value={s} />)}</datalist>
         </form>
 
-        <ResultsPanel result={result} problems={problems} empty={empty} gain={gains.total} bench={bench} draft={draft} reference={reference}
-          building={matchedBuilding} byField={byField} goTo={goTo} onPreview={() => setPreview("preview-button-results")} />
-      </div>
-
-      <div className="layout single">
         <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} result={result} onNext={goTo("export")} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
         <ExportPanel draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} onExported={() => setExported(true)} onFix={goTo("results")} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
+        </div>
+
+        <ResultsPanel result={result} problems={problems} empty={empty} gain={gains.total} bench={bench} draft={draft} reference={reference}
+          building={matchedBuilding} byField={byField} goTo={goTo} />
       </div>
 
-      <PreviewOverlay open={preview !== null} onClose={() => setPreview(null)} returnFocusTo={preview ?? undefined}
-        draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} />
 
       <nav className="tabbar" aria-label="Sections">
         {TABS.map((t) => {
