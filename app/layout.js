@@ -31,7 +31,9 @@ export const metadata = {
   },
 };
 
-export const viewport = { width: "device-width", initialScale: 1 };
+// viewportFit cover: the page may extend under the iPhone home indicator, so env(safe-area-inset-bottom)
+// is real and the tab bar can pad itself to the screen edge.
+export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }) {
   return (

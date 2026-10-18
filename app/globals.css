@@ -381,7 +381,9 @@ p.pv-gap, div.pv-gap { display: block; }
 .tabbar { display: none; }
 .phone-only { display: none; }
 @media (max-width: 899px) {
-  .app { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  /* room for the bar under everything including the footer, which sits outside .app: the bar is 56px,
+     plus the home-indicator inset, plus a little air */
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 12px); }
   .app[data-tab="draft"] .results, .app[data-tab="draft"] .rewrite, .app[data-tab="draft"] .export { display: none; }
   .app[data-tab="check"] .form, .app[data-tab="check"] .rewrite, .app[data-tab="check"] .export, .app[data-tab="check"] .stepper-wrap { display: none; }
   .app[data-tab="rewrite"] .form, .app[data-tab="rewrite"] .results, .app[data-tab="rewrite"] .export, .app[data-tab="rewrite"] .stepper-wrap { display: none; }
@@ -389,7 +391,7 @@ p.pv-gap, div.pv-gap { display: block; }
   .app:not([data-tab="draft"]) .layout { padding-top: 1rem; }
   .tabbar {
     display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-    background: var(--paper); border-top: 1px solid var(--rule-strong); padding-bottom: env(safe-area-inset-bottom);
+    background: var(--paper); border-top: 1px solid var(--rule-strong); padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   /* the bar gives way to the keyboard */
   .app:has(.form input:focus, .form textarea:focus, .form select:focus) .tabbar { display: none; }
