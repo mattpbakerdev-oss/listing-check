@@ -460,7 +460,7 @@ p.pv-gap, div.pv-gap { display: block; }
   .tab-mark[data-tone="ok"] { color: var(--ok); }
   .tab-mark[data-tone="warn"] { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); top: 9px; }
   .tab-count { position: absolute; top: 4px; right: calc(50% - 44px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--warn); color: #fff; font-size: 0.6875rem; font-weight: 600; display: grid; place-items: center; }
-  .foot { padding-bottom: 1rem; }
+  .foot { padding-bottom: 1rem; padding-top: 1.5rem; }
 }
 
 /* phones: the header is one line from the start, the stepper one row, the demo controls small and
@@ -474,9 +474,18 @@ p.pv-gap, div.pv-gap { display: block; }
   .saved-line a.plain { text-decoration: underline; text-decoration-color: var(--rule-strong); }
   .export .form-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .export .form-actions button { width: 100%; }
-  /* the tab is the surface: no outer card around the listing card and its actions */
-  .export.card { background: transparent; border: 0; box-shadow: none; padding: 0; }
-  .export .listing-card { background: var(--paper); }
+  /* the tool tabs are white surfaces edge to edge, like the desktop pane; Draft keeps its cards on the
+     canvas like the desktop form column. Inside, sections sit directly on the surface. */
+  .app:not([data-tab="draft"]) .layout { padding: 0; }
+  .app:not([data-tab="draft"]) .main-col { gap: 0; }
+  .app[data-tab="check"] .main-col { display: none; } /* otherwise its grid gap shows as a strip above the Check surface */
+  .results, .rewrite.card, .export.card {
+    background: var(--paper); border: 0; border-radius: 0; box-shadow: none; padding: 1.5rem 1rem 2rem;
+    min-height: calc(100vh - 56px - 56px - env(safe-area-inset-bottom, 0px));
+  }
+  .results { display: block; }
+  .results .results-card { background: transparent; border: 0; box-shadow: none; padding: 0; }
+  .results-next { margin-top: 1.5rem; }
 }
 @media (max-width: 599px) {
   .demo button { min-height: 40px; padding: 0.35rem 0.7rem; font-size: 0.875rem; }
