@@ -97,14 +97,16 @@ function BuildingCard({ building }) {
         <span>{building.nearest_station}</span>
       </p>
       <p className="building-facts muted">
-        {[line?.name, building.walk_min ? `${building.walk_min} min walk` : null].filter(Boolean).join(" · ")}
+        {building.walk_min
+          ? `${building.walk_min} minute${building.walk_min === 1 ? "" : "s"}' walk${line?.name ? ` on the ${line.name}` : ""}.`
+          : line?.name ? `On the ${line.name}.` : null}
       </p>
       <p className="building-facts muted">
         {[
           year ? `Built ${year}` : null,
-          building.tier ? TIER_WORD[building.tier] ?? building.tier : null,
+          building.tier ? (TIER_WORD[building.tier] ?? building.tier).toLowerCase() : null,
           `${building.listing_count ?? 0} listing${building.listing_count === 1 ? "" : "s"} in our data`,
-        ].filter(Boolean).join(" · ")}
+        ].filter(Boolean).join(", ")}.
       </p>
     </section>
   );
