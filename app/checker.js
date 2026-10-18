@@ -149,7 +149,7 @@ export default function Checker({ reference }) {
         <form className="form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-top">
             <div className="form-actions demo">
-              <button type="button" onClick={() => loadDraft(EXAMPLE)}><span className="phone-only">Example</span><span className="desktop-only">Example draft</span></button>
+              <button type="button" className="quiet" onClick={() => loadDraft(EXAMPLE)}><span className="phone-only">Example</span><span className="desktop-only">Example draft</span></button>
               <button type="button" className="quiet" onClick={() => loadDraft(MISPRICED)}><span className="phone-only">Mispriced</span><span className="desktop-only">Mispriced draft</span></button>
               {isEmptyDraft(draft) ? null : <button type="button" className="quiet" onClick={() => loadDraft(EMPTY)}>Clear</button>}
             </div>
