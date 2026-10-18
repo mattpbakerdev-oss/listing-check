@@ -494,3 +494,8 @@ p.pv-gap, div.pv-gap { display: block; }
 .option-sub { font-size: 0.8125rem; font-weight: 400; color: var(--muted); line-height: 1.35; }
 .linklike { display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; font: inherit; font-size: inherit; cursor: pointer; }
 .linklike:hover { filter: none; }
+
+/* desktop reading sizes: hints, field messages, fix messages and price facts at 14px; structural labels stay small */
+@media (min-width: 1000px) {
+  .hint, .fieldmsg, .fixes .msg, .fixes .pts, .bench-facts dt, .bench .hint, .building-facts, .card-purpose { font-size: 0.875rem; }
+}
