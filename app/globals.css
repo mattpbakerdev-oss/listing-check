@@ -171,6 +171,10 @@ fieldset { margin: 0; padding: var(--card-pad); display: grid; gap: 1rem; min-wi
 .chip { margin-left: auto; padding: 0.15rem 0.5rem; border-radius: var(--radius); font-size: 0.75rem; font-weight: 600; line-height: 1.4; }
 .chip[data-tone="ok"] { background: var(--ok-soft); color: var(--ok); }
 .chip[data-tone="warn"] { background: var(--warn-soft); color: var(--warn); }
+.chip[data-tone="alert"] { background: var(--alert-soft); color: var(--alert); }
+.chip[data-tone="note"] { background: var(--well); color: var(--ink); }
+.listing-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.listing-chips .chip { margin-left: 0; }
 /* section marker: "01 · The listing", above the heading */
 .marker { display: inline-block; font-variant-numeric: tabular-nums; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); margin-right: 0.15em; }
 

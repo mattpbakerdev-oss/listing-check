@@ -84,7 +84,7 @@ function ListingCard({ draft, result, building, area, verdict }) {
       {m.descriptionMissing ? <p>{gap("Description missing")}</p> : <p className="listing-desc">{m.description}</p>}
       {m.descriptionTh ? <p className="listing-desc" lang="th">{m.descriptionTh}</p> : null}
       {lease ? <p className="listing-line">{lease}</p> : null}
-      {m.badges.length ? <p className="portal-badges">{m.badges.map((b) => <span key={b.id} className="portal-badge" data-tone={b.tone}>{b.text}</span>)}</p> : null}
+      {m.badges.length ? <p className="listing-chips">{m.badges.map((b) => <span key={b.id} className="chip" data-tone={b.tone}>{b.text}</span>)}</p> : null}
     </article>
   );
 }
