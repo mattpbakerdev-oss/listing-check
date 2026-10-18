@@ -114,7 +114,7 @@ code { font-size: 0.9em; }
 /* states: done green tick, current dashed teal, partial amber number, later grey outline */
 .step-dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; font-variant-numeric: tabular-nums; background: var(--paper); border: 1.5px solid var(--rule-strong); color: var(--muted); }
 .stepper li[data-status="current"] .step-dot { border: 1.5px dashed var(--accent); color: var(--accent); }
-.stepper li[data-status="partial"] .step-dot { border-color: var(--warn); color: var(--warn); }
+.stepper li[data-status="partial"] a::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); } /* visited, not complete */
 .stepper li[data-status="done"] .step-dot { background: var(--ok); border-color: var(--ok); color: #fff; }
 .stepper li[data-status="current"] a { color: var(--ink); font-weight: 500; }
 .stepper li[data-status="done"] a { color: var(--ink); }
@@ -185,12 +185,11 @@ input:hover, textarea:hover, select:hover { border-color: var(--muted); }
 textarea { resize: vertical; line-height: 1.45; }
 textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--font-thai), var(--font-sans), sans-serif; }
 /* borders: neutral at rest, amber or red only with a message, teal while focused */
-.field[data-status="partial"] input, .field[data-status="partial"] textarea, .field[data-status="partial"] select { border-color: var(--warn); }
 .field[data-status="invalid"] input, .field[data-status="invalid"] textarea, .field[data-status="invalid"] select { border-color: var(--alert); }
 .field input:focus, .field textarea:focus, .field select:focus, input:focus, textarea:focus, select:focus {
   outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px var(--focus-ring);
 }
-.fieldmsg { font-size: 0.8125rem; color: var(--warn); }
+.fieldmsg { font-size: 0.8125rem; color: var(--muted); } /* amber is for status marks only; red stays for invalid */
 .field[data-status="invalid"] .fieldmsg { color: var(--alert); }
 .field[data-status="missing"] .fieldmsg { color: var(--muted); }
 .hint { font-size: 0.8125rem; color: var(--muted); }
@@ -215,14 +214,10 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .ring-number { font-size: 2.5rem; font-weight: 600; fill: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .ring[data-size="small"] .ring-number { font-size: 2.75rem; letter-spacing: 0; }
 .ring[data-size="small"] .ring-track, .ring[data-size="small"] .ring-fill { stroke-width: 11; }
+.ring[data-size="small"] .ring-fill { stroke: var(--ink); } /* the header ring is chrome: neutral, the big ring carries the band */
 .ring-of { font-size: 0.75rem; fill: var(--muted); }
-.score-word { font-size: 1.125rem; font-weight: 600; line-height: 1.15; }
-.score-word[data-band="low"] { color: var(--alert); }
-.score-word[data-band="mid"] { color: var(--warn); }
-.score-word[data-band="high"] { color: var(--ok); }
-.score-word[data-band="empty"] { color: var(--muted); }
+.score-word { font-size: 1.0625rem; font-weight: 400; line-height: 1.35; color: var(--ink); } /* the ring carries the colour */
 .score-sub { color: var(--muted); font-size: 0.9375rem; margin-top: 0.25rem; }
-.score-word { font-size: 1.0625rem; }
 .gain-chip { display: inline-block; margin-bottom: 0.35rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--ok-soft); color: var(--ok); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 3s ease-out forwards; }
 @media (prefers-reduced-motion: reduce) { .gain-chip { animation: none; } }
 /* what shaped it: a bar per card */
@@ -247,7 +242,6 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 
 .problems { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
 .problems li { display: grid; grid-template-columns: auto auto 1fr; gap: 0 0.6rem; align-items: baseline; padding: 0.5rem 0.75rem; background: var(--paper); border: 1px solid var(--rule); border-left: 3px solid var(--rule-strong); border-radius: var(--radius); }
-.problems li[data-status="partial"] { border-left-color: var(--warn); }
 .problems li[data-status="invalid"] { border-left-color: var(--alert); }
 .problems li a { font-weight: 500; text-decoration: none; color: var(--ink); }
 .problems li a:hover { text-decoration: underline; }
