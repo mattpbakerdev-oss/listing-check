@@ -72,9 +72,8 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
         </section>
       </div>
 
-      <p className="to-rewrite desktop-only"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
       {empty ? null : (
-        <div className="form-actions phone-only">
+        <div className="form-actions results-next">
           {needsRewrite ? <button type="button" onClick={goTo("rewrite")}>Next: Rewrite</button> : <button type="button" onClick={goTo("export")}>Next: Export</button>}
         </div>
       )}

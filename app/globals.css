@@ -311,7 +311,7 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .bench-facts dt { font-size: 0.8125rem; color: var(--muted); }
 .bench-facts dd { margin: 0; font-variant-numeric: tabular-nums; }
 .bench .hint { margin-top: 0.625rem; }
-.to-rewrite { font-size: 0.9375rem; color: var(--muted); }
+.results-next { margin-top: 1.5rem; }
 
 /* AI rewrite */
 .rewrite { display: grid; gap: 1rem; }
