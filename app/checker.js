@@ -183,7 +183,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">The listing</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">01 · The listing</span><span className="card-title">The listing</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[0].fields)} /></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">01</span><span className="card-title">The listing</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[0].fields)} /></div>
             <Field quiet={empty} f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
@@ -209,7 +209,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">The unit</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[1].fields)} /></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">02</span><span className="card-title">The unit</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[1].fields)} /></div>
             <div className="row wide">
               <Field quiet={empty} f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -261,7 +261,7 @@ export default function Checker({ reference }) {
 
           <fieldset className="card">
             <legend className="sr-only">Price and photos</legend>
-            <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[2].fields)} /></div>
+            <div className="card-head" aria-hidden="true"><span className="marker">03</span><span className="card-title">Price and photos</span><CardChip n={empty ? null : fixCount(result.fields, STEPS[2].fields)} /></div>
             <div className="row">
               <Field quiet={empty} f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride={<><span className="phone-only">Rent (THB)</span><span className="desktop-only">Monthly rent (THB)</span></>}
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
