@@ -77,8 +77,8 @@ export default function Checker({ reference }) {
   const byField = Object.fromEntries(result.fields.map((f) => [f.field, f]));
   const bench = useBenchmark(draft, result, reference, byField);
   const gains = useGains(result);
-  const compact = useCompactHeader();
-  const steps = stepStatuses(result.fields, { applied, exported });
+  const filled = new Set(Object.entries(draft).filter(([, v]) => String(v ?? "").trim() !== "").map(([k]) => k));
+  const steps = stepStatuses(result.fields, { applied, exported, filled });
   // Lease terms are not scored, so terms alone leave the results in their empty state.
   const empty = isEmptyDraft(draft, LEASE_FIELDS);
 
@@ -88,8 +88,6 @@ export default function Checker({ reference }) {
   const matchedBuilding = result.matched.building_id ? reference.buildings.find((b) => b.building_id === result.matched.building_id) : null;
   const matchedArea = reference.areas.find((a) => a.area_id === (result.matched.area_id ?? matchedBuilding?.area_id)) ?? null;
 
-  // Scroll so the results sit just under the sticky header. The header is 58px once compact,
-  // which it will be by the time the scroll lands, so use that rather than its current height.
   // Scroll so `el` sits `extra` px under the sticky header. The header compresses once the page
   // has scrolled, which moves everything above the target up by (full - compact), so the full
   // header height is the right offset from either state. Chrome's scroll anchoring would then
@@ -132,29 +130,24 @@ export default function Checker({ reference }) {
 
   return (
     <div className="app" data-tab={tab}>
-      <header className={`top${compact ? " compact" : ""}`}>
-        <div className="top-inner">
-          <div className="top-row">
-            <h1>Listing Check</h1>
-            <ol className="top-steps" aria-hidden="true">
-              {steps.map((s) => <li key={s.id} data-status={s.status} />)}
-            </ol>
-            <a className="top-score" href="#results" onClick={jumpToResults} aria-label={`Score ${result.score} of 100. Jump to the results.`}>
-              <ScoreRing score={result.score} small />
-              <span className="top-score-text">
-                {empty ? "empty" : problems.length === 0 ? "complete" : `${problems.length} to fix`}
-                {verdict ? <span className="desktop-only"> · {shortVerdict(verdict)}</span> : null}
-              </span>
-            </a>
-          </div>
-          <p className="purpose">Check a Bangkok rental listing before it goes live: what is missing, and whether the price makes sense.</p>
-          <p className="notice">
-            Running on sample data generated from public market averages. <a href="/import">Import your listings</a> to run it on your own.
-          </p>
+      {/* One 56px line, never taller: name, the stepper (desktop), the score. The intro scrolls away under it. */}
+      <header className="top">
+        <div className="top-inner top-row">
+          <h1>Listing Check</h1>
+          <Stepper steps={steps} goTo={goTo} />
+          <a className="top-score" href="#results" onClick={jumpToResults} aria-label={`Score ${result.score} of 100. Jump to the results.`}>
+            <ScoreRing score={result.score} small />
+            <span className="top-score-text">{empty ? "empty" : problems.length === 0 ? "complete" : `${problems.length} to fix`}</span>
+          </a>
         </div>
       </header>
 
-      <Stepper steps={steps} goTo={goTo} />
+      <section className="intro desktop-only" aria-label="About this tool">
+        <p className="purpose">Check a Bangkok rental listing before it goes live: what is missing, and whether the price makes sense.</p>
+        <p className="notice">
+          Running on sample data generated from public market averages. <a href="/import">Import your listings</a> to run it on your own.
+        </p>
+      </section>
 
       <div className="layout">
         <form className="form" onSubmit={(e) => e.preventDefault()}>
@@ -404,7 +397,6 @@ function CardChip({ n }) {
 
 // Five steps under the header. Done, current and to do come from lib/steps.js; a tap scrolls to the card.
 function Stepper({ steps, goTo }) {
-  const current = steps.find((s) => s.status === "current");
   return (
     <nav className="stepper-wrap" aria-label="Progress">
       <ol className="stepper">
@@ -413,14 +405,11 @@ function Stepper({ steps, goTo }) {
             <a href={`#${s.target}`} onClick={goTo(s.target)} aria-current={s.status === "current" ? "step" : undefined}>
               <span className="step-dot" aria-hidden="true">{s.status === "done" ? "✓" : s.n}</span>
               <span className="step-label">{s.label}</span>
-              <span className="sr-only">, {s.status === "done" ? "done" : s.status === "current" ? "current step" : "to do"}</span>
+              <span className="sr-only">, {s.status === "done" ? "done" : s.status === "current" ? "current step" : s.status === "partial" ? "started, not complete" : "to do"}</span>
             </a>
           </li>
         ))}
       </ol>
-      <p className="stepper-now" aria-hidden="true">
-        {current ? `${current.n} of 5 · ${current.heading}` : "All done"}
-      </p>
     </nav>
   );
 }
@@ -458,23 +447,6 @@ function BuildingCard({ building }) {
   );
 }
 
-// The header compresses to one line once the page has scrolled past the intro. Hysteresis so
-// the header shrinking (which shifts the page) cannot flip it straight back.
-function useCompactHeader() {
-  const [compact, setCompact] = useState(false);
-  useEffect(() => {
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      setCompact((c) => (c ? window.scrollY > 24 : window.scrollY > 96));
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    read();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
-  }, []);
-  return compact;
-}
 
 // A ring that fills by score, with the number inside. `small` is the 40px header version.
 function ScoreRing({ score, small = false }) {
