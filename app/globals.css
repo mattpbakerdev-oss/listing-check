@@ -149,7 +149,7 @@ fieldset { margin: 0; padding: var(--card-pad); display: grid; gap: 1.125rem; mi
 .chip { margin-left: auto; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; line-height: 1.4; }
 .chip[data-tone="ok"] { background: var(--ok-soft); color: var(--ok); }
 .chip[data-tone="warn"] { background: var(--warn-soft); color: var(--warn); }
-@media (max-width: 599px) { /* section marker: "01 · The listing", above the heading */
+/* section marker: "01 · The listing", above the heading */
 .marker { display: inline-block; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; color: var(--accent); }
 
 button {
