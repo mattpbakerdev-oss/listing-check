@@ -33,18 +33,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --canvas: #0f1215;
-    --paper: #171b20;
-    --well: #1f252b;
-    --rule: #2f3841;
-    --rule-strong: #46505a;
+    --canvas: #15191c;
+    --paper: #1c2126;
+    --well: #262d33;
+    --rule: #343c45;
+    --rule-strong: #4a545e;
     --ink: #e8ecf0;
     --label: #c5ccd4;
     --muted: #9aa4b1;
     --accent: #4fb3c4;
     --accent-fill: #1f7f90;
     --accent-ink: #ffffff;
-    --tint: #1a2227;
+    --tint: #1f272c;
     --focus: #4fb3c4;
     --focus-ring: rgba(79, 179, 196, 0.3);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
