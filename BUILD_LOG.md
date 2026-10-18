@@ -499,3 +499,11 @@ Matt's two notes on the live pane: it left a band of dead canvas between the for
 **What went wrong.** The restructure cut the tier-word table that lived between the two functions it replaced, and the page crashed with "TIER_WORD is not defined" the moment a building matched. The first check only reported a missing price section; printing the page errors before waiting on any element found it in one run.
 
 **Verified.** 274 tests, `next build` clean, no console errors at 1280, 1800 or 375, no horizontal scroll.
+
+## 18 Oct 2026, nothing inside the pane but the sections
+
+Matt: no box inside the right panel, everything on the panel directly. Done for the desktop pane from 1000px: the inner card has no background, border, shadow or padding there, and the five sections sit on the pane with their hairlines; the bar markers' halo matches the pane. The phone's Check tab keeps its white card, because there the canvas is the surface. Empty and example states at 1280, side by side: [light](docs/screenshots/pass7-pane-light.png) · [dark](docs/screenshots/pass7-pane-dark.png).
+
+**A bug Matt's screenshot showed and the sheets had hidden.** The empty state had a hundred pixels of air between the ring and the price check and a heading eighty pixels tall. The pane has a fixed height, its grid child stretched to fill it, and the grid spread the spare height across the sections and then across their children. The earlier example-state sheets looked fine only because that state's content already filled the pane. Fixed by start-aligning the pane, the card and each section. Measured in the empty state: the score section 112px, the price heading 18px; in the example state every section at its content height.
+
+**Verified.** 274 tests, `next build` clean, no console errors, no horizontal scroll at 375.
