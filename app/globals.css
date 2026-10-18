@@ -138,8 +138,10 @@ code { font-size: 0.9em; }
 @media (min-width: 1000px) {
   .layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 0; padding: 0; max-width: 1360px; margin: 0 auto; }
   .main-col { padding: 1.5rem; max-width: 880px; width: 100%; justify-self: center; }
+  /* the pane scrolls with the page: one scrollbar, no nested scroll. The white column still runs the
+     full height of the grid; its content sits at the top. The header ring keeps the score in view. */
   .results {
-    position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; align-self: start;
+    align-self: stretch;
     background: var(--paper); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
   }
   /* no box inside the pane: the sections sit directly on it. The pane has a fixed height, so its

@@ -532,3 +532,7 @@ A review of layout and colour against the design brief's own tells: where the pa
 ## 18 Oct 2026, the preview button is back
 
 Matt could not find the preview. It had gone with the "Export is the preview" pass. The overlay is restored from git and "Preview as a listing" sits in the results pane's closing row beside the Next button, on both layouts; it opens the full portal-style preview with the gaps toggle as before, Escape closes it and focus returns to the button. [pass10-preview-1280.png](docs/screenshots/pass10-preview-1280.png).
+
+## 18 Oct 2026, the pane scrolls with the page
+
+Matt asked whether the right pane should scroll with the rest. It should: pinned with its own scroll it was a second scroll region, the wheel behaved differently over each column, and the building and price sections were hidden until the pane itself was scrolled. The header ring and the card chips already keep the score in view. The pane is now an ordinary column that stretches the full height of the grid, white with its hairline as before, its content at the top, one scrollbar for the page. Measured at 1280 and 1024: the pane's bottom edge equals the grid's bottom edge, and after an 800px page scroll the pane has moved 800px with it. Full page at 1280: [pass11-pane-scrolls.png](docs/screenshots/pass11-pane-scrolls.png).
