@@ -141,13 +141,15 @@ code { font-size: 0.9em; }
   /* the pane is pinned under the header; its content moves with the page at its own pace (see
      usePacedPane). overflow: clip, not hidden, so focus cannot scroll the pane itself. */
   .results {
-    position: sticky; top: 56px; height: calc(100vh - 56px); align-self: start; overflow: clip;
+    position: sticky; top: 56px; height: calc(100vh - 56px); align-self: start;
     background: var(--paper); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
   }
-  .results-inner { will-change: transform; }
+  /* the clip sits inside the padding, with a soft 24px fade at each end so the moving content never
+     butts against the header line or the bottom edge */
+  .results-clip { height: 100%; min-height: 0; overflow: clip; mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
+  .results-inner { will-change: transform; padding: 24px 0; }
   /* no box inside the pane: the sections sit directly on it. The pane has a fixed height, so its
      content must align to the start or the grid spreads the spare height across the sections. */
-  .results { display: grid; align-content: start; }
   .results .results-card { background: transparent; border: 0; box-shadow: none; padding: 0; align-content: start; }
   .results .bar-fill::after { box-shadow: 0 0 0 2px var(--paper); }
 }

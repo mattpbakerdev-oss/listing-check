@@ -22,7 +22,8 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
   const pane = useRef(null), inner = useRef(null);
   usePacedPane(pane, inner);
   return (
-    <aside className="results" id="results" ref={pane}>
+    <aside className="results" id="results">
+      <div className="results-clip" ref={pane}>
       <div className="results-inner" ref={inner}>
       <div className="results-card card">
         <section className="rs" aria-label="Score">
@@ -83,6 +84,7 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
         </div>
       )}
       </div>
+      </div>
     </aside>
   );
 }
@@ -96,8 +98,7 @@ function usePacedPane(pane, inner) {
     const mq = window.matchMedia("(min-width: 1000px)");
     let raf = 0;
     const metrics = () => {
-      const cs = getComputedStyle(pane.current);
-      const paneH = pane.current.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const paneH = pane.current.clientHeight;
       const overflow = Math.max(0, inner.current.scrollHeight - paneH);
       const range = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       return { overflow, range };
@@ -120,7 +121,7 @@ function usePacedPane(pane, inner) {
       if (overflow) window.scrollBy({ top: (need * range) / overflow, behavior: "auto" });
     };
     const ro = new ResizeObserver(schedule);
-    ro.observe(inner.current); ro.observe(document.documentElement);
+    ro.observe(inner.current); ro.observe(pane.current); ro.observe(document.documentElement);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     pane.current.addEventListener("focusin", onFocus);
