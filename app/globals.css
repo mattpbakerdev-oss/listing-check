@@ -377,7 +377,7 @@ th { font-weight: 500; color: var(--muted); }
 .portal-contact-title { font-weight: 700; text-align: center; margin-bottom: 0.25rem; }
 .portal-contact input { background: var(--paper); }
 .portal-send { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.pv-gap { display: inline-block; padding: 0.2rem 0.6rem; border: 1.5px dashed var(--warn); border-radius: 6px; color: var(--warn); font-size: 0.875rem; font-weight: 500; }
+.pv-gap { display: inline-block; padding: 0.2rem 0.6rem; border: 1.5px dashed var(--rule-strong); border-radius: var(--radius); color: var(--muted); font-size: 0.875rem; font-weight: 500; }
 p.pv-gap, div.pv-gap { display: block; }
 
 /* phone tabs: under 900px the one screen is four tabs with a fixed bar at the bottom. Sections are
@@ -441,7 +441,7 @@ p.pv-gap, div.pv-gap { display: block; }
 .listing-desc { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
 .export-done { font-size: 0.9375rem; }
 .export-done[data-tone="ok"] strong { color: var(--ok); }
-.export-done[data-tone="warn"] strong { color: var(--warn); }
+.export-done[data-tone="warn"] strong { color: var(--ink); }
 
 /* two option cards side by side: the main ways to take the listing away */
 .option-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }

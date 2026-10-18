@@ -3,7 +3,7 @@
 import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, MIN_COMPARABLES, proximityNote } from "../lib/benchmark/bands.js";
 import { lineFor } from "../lib/stations.js";
-import { verdictSentence, groupBars } from "../lib/results.js";
+import { verdictSentence, groupBars, barBand } from "../lib/results.js";
 import { ScoreRing, scoreBand } from "./score-ring.js";
 
 const baht = (n) => `฿${Math.round(Number(n)).toLocaleString("en-US")}`;
@@ -32,7 +32,7 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
               {bars.map((b) => (
                 <li key={b.id}>
                   <a href={`#${b.target}`} onClick={goTo(b.target)}>{b.label}</a>
-                  <span className="bar-track" aria-hidden="true"><span className="bar-fill" data-band={scoreBand(Math.round((b.earned / b.points) * 100))} style={{ width: `${(b.earned / b.points) * 100}%` }} /></span>
+                  <span className="bar-track" aria-hidden="true"><span className="bar-fill" data-band={barBand((b.earned / b.points) * 100)} style={{ width: `${(b.earned / b.points) * 100}%` }} /></span>
                   <span className="bar-num">{formatPts(b.earned)}<span className="muted">/{b.points}</span></span>
                 </li>
               ))}

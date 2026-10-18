@@ -1,7 +1,9 @@
 "use client";
 
-// Red under 60, amber 60 to 84, green 85 and over. The same three tones as the price verdict.
-export const scoreBand = (s) => (s >= 85 ? "high" : s >= 60 ? "mid" : "low");
+import { ringBand } from "../lib/results.js";
+
+// The ring's band, shared with the results panel.
+export const scoreBand = ringBand;
 
 // A ring that fills by score, with the number inside. `small` is the 40px header version.
 export function ScoreRing({ score, small = false }) {
