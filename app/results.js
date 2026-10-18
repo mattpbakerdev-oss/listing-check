@@ -12,7 +12,7 @@ const formatPts = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 // The results panel: the score with a gain chip when it has just risen, one sentence, then
 // "What shaped it" as a bar per card, the fields to fix, the building card and the price check.
 // One component: the desktop right column and the phone Check tab.
-export default function ResultsPanel({ result, problems, empty, gain, bench, draft, reference, building, byField, goTo }) {
+export default function ResultsPanel({ result, problems, empty, gain, bench, draft, reference, building, byField, goTo, onPreview }) {
   const bars = groupBars(result.fields);
   const needsRewrite = byField.title.earned < byField.title.points || byField.description.earned < byField.description.points;
   const sentence = verdictSentence({ empty, score: result.score, toFix: problems.length });
@@ -74,6 +74,7 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
 
       {empty ? null : (
         <div className="form-actions results-next">
+          <button type="button" className="quiet" id="preview-button-results" onClick={onPreview}>Preview as a listing</button>
           {needsRewrite ? <button type="button" onClick={goTo("rewrite")}>Next: Rewrite</button> : <button type="button" onClick={goTo("export")}>Next: Export</button>}
         </div>
       )}

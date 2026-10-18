@@ -13,6 +13,7 @@ import RewritePanel from "./rewrite.js";
 import ExportPanel from "./export.js";
 import ResultsPanel from "./results.js";
 import CardHead from "./card-head.js";
+import PreviewOverlay from "./preview.js";
 import { ScoreRing } from "./score-ring.js";
 
 const EMPTY = {
@@ -66,7 +67,8 @@ export default function Checker({ reference }) {
   // Steps 4 and 5 of the stepper: a rewrite has been applied, the listing has been copied or downloaded.
   const [applied, setApplied] = useState(false);
   const [exported, setExported] = useState(false);
-  // Phone tabs. Desktop ignores this: the CSS only hides sections under 900px.
+  const [preview, setPreview] = useState(false); // the full listing preview overlay
+  // Phone tabs. Desktop ignores this: the CSS only hides sections under 1000px.
   const [tab, setTab] = useState("draft");
   const [pendingScroll, setPendingScroll] = useState(null);
   const autosave = useAutosave(draft);
@@ -296,9 +298,12 @@ export default function Checker({ reference }) {
         </div>
 
         <ResultsPanel result={result} problems={problems} empty={empty} gain={gains.total} bench={bench} draft={draft} reference={reference}
-          building={matchedBuilding} byField={byField} goTo={goTo} />
+          building={matchedBuilding} byField={byField} goTo={goTo} onPreview={() => setPreview(true)} />
       </div>
 
+
+      <PreviewOverlay open={preview} onClose={() => setPreview(false)} returnFocusTo="preview-button-results"
+        draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} />
 
       <nav className="tabbar" aria-label="Sections">
         {TABS.map((t) => {

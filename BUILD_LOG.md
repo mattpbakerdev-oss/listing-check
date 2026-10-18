@@ -528,3 +528,7 @@ A review of layout and colour against the design brief's own tells: where the pa
 **Counts on the example state at 1280, whole page.** Amber: six, the three chips, the ring, the bar for the listing card, and the verdict's key phrase, which Matt asked for from the goal-progress reference. Teal: fourteen, which is the name, the current step, the five eyebrow numbers, the two primary buttons, the copy-as-text option card, and four links; the numbers are the largest group and are the original brief's teal markers.
 
 **Verified.** 274 tests, `next build` clean, no console errors at 1280, 1024 or 375, no horizontal scroll, scores and rewrites behaving as before (70 to 83 on the example).
+
+## 18 Oct 2026, the preview button is back
+
+Matt could not find the preview. It had gone with the "Export is the preview" pass. The overlay is restored from git and "Preview as a listing" sits in the results pane's closing row beside the Next button, on both layouts; it opens the full portal-style preview with the gaps toggle as before, Escape closes it and focus returns to the button. [pass10-preview-1280.png](docs/screenshots/pass10-preview-1280.png).
