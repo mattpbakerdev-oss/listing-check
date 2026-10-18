@@ -14,3 +14,6 @@ out/
 .vercel/
 .claude/settings.local.json
 .DS_Store
+
+# screen recordings for review, not for the repo
+screen recordings/

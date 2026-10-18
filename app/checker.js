@@ -178,7 +178,8 @@ export default function Checker({ reference }) {
           </div>
 
           <fieldset className="card">
-            <legend><span className="marker" aria-hidden="true">01 · The listing</span>The listing</legend>
+            <legend className="sr-only">The listing</legend>
+            <div className="card-head" aria-hidden="true"><span className="marker">01 · The listing</span><span className="card-title">The listing</span></div>
             <Field f={byField.title} gain={gains.fields.title} htmlFor="title">
               <input id="title" value={draft.title} onChange={set("title")} autoComplete="off" />
             </Field>
@@ -203,7 +204,8 @@ export default function Checker({ reference }) {
           </fieldset>
 
           <fieldset className="card">
-            <legend><span className="marker" aria-hidden="true">02 · The unit</span>The unit</legend>
+            <legend className="sr-only">The unit</legend>
+            <div className="card-head" aria-hidden="true"><span className="marker">02 · The unit</span><span className="card-title">The unit</span></div>
             <div className="row">
               <Field f={byField.building} gain={gains.fields.building} htmlFor="building">
                 <input id="building" list="buildings" value={draft.building} onChange={set("building")} autoComplete="off" />
@@ -251,7 +253,8 @@ export default function Checker({ reference }) {
           </fieldset>
 
           <fieldset className="card">
-            <legend><span className="marker" aria-hidden="true">03 · Price and photos</span>Price and photos</legend>
+            <legend className="sr-only">Price and photos</legend>
+            <div className="card-head" aria-hidden="true"><span className="marker">03 · Price and photos</span><span className="card-title">Price and photos</span></div>
             <div className="row">
               <Field f={byField.monthly_rent_thb} gain={gains.fields.monthly_rent_thb} htmlFor="monthly_rent_thb" labelOverride="Monthly rent (THB)"
                 help="The asking rent per month in Thai baht. The price check divides it by the size and compares it with similar listings.">
