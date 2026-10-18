@@ -4,6 +4,7 @@ import { num } from "../lib/completeness/rules.js";
 import { band, basisLabel, MIN_COMPARABLES, proximityNote } from "../lib/benchmark/bands.js";
 import { lineFor } from "../lib/stations.js";
 import { verdictSentence, groupBars, barBand } from "../lib/results.js";
+import { useEffect, useRef } from "react";
 import { ScoreRing, scoreBand } from "./score-ring.js";
 
 const baht = (n) => `฿${Math.round(Number(n)).toLocaleString("en-US")}`;
@@ -18,8 +19,11 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
   const sentence = verdictSentence({ empty, score: result.score, toFix: problems.length });
   const cut = sentence.indexOf(". ");
   const key = cut > 0 ? sentence.slice(0, cut + 1) : sentence, rest = cut > 0 ? sentence.slice(cut + 1) : "";
+  const pane = useRef(null), inner = useRef(null);
+  usePacedPane(pane, inner);
   return (
-    <aside className="results" id="results">
+    <aside className="results" id="results" ref={pane}>
+      <div className="results-inner" ref={inner}>
       <div className="results-card card">
         <section className="rs" aria-label="Score">
           <div className="score-hero">
@@ -78,8 +82,52 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
           {needsRewrite ? <button type="button" onClick={goTo("rewrite")}>Next: Rewrite</button> : <button type="button" onClick={goTo("export")}>Next: Export</button>}
         </div>
       )}
+      </div>
     </aside>
   );
+}
+
+// From 1000px the pane is pinned under the header and its content moves with the page scroll at
+// its own pace: at the top of the page the content is at the top, at the bottom of the page the
+// content's end meets the pane's end, and in between it is proportional. One scrollbar, nothing
+// unreachable. Focus inside the pane scrolls the page by the amount that brings the element into view.
+function usePacedPane(pane, inner) {
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1000px)");
+    let raf = 0;
+    const metrics = () => {
+      const cs = getComputedStyle(pane.current);
+      const paneH = pane.current.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const overflow = Math.max(0, inner.current.scrollHeight - paneH);
+      const range = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      return { overflow, range };
+    };
+    const place = () => {
+      raf = 0;
+      if (!pane.current || !inner.current) return;
+      if (!mq.matches) { inner.current.style.transform = ""; return; }
+      const { overflow, range } = metrics();
+      const progress = Math.min(1, Math.max(0, window.scrollY / range));
+      inner.current.style.transform = overflow ? `translateY(${-Math.round(progress * overflow)}px)` : "";
+    };
+    const schedule = () => { if (!raf) raf = requestAnimationFrame(place); };
+    const onFocus = (e) => {
+      if (!mq.matches || !pane.current) return;
+      const box = pane.current.getBoundingClientRect(), el = e.target.getBoundingClientRect();
+      const need = el.bottom > box.bottom - 8 ? el.bottom - box.bottom + 8 : el.top < box.top + 8 ? el.top - box.top - 8 : 0;
+      if (!need) return;
+      const { overflow, range } = metrics();
+      if (overflow) window.scrollBy({ top: (need * range) / overflow, behavior: "auto" });
+    };
+    const ro = new ResizeObserver(schedule);
+    ro.observe(inner.current); ro.observe(document.documentElement);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    pane.current.addEventListener("focusin", onFocus);
+    place();
+    const el = pane.current;
+    return () => { ro.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); el?.removeEventListener("focusin", onFocus); if (raf) cancelAnimationFrame(raf); };
+  }, [pane, inner]);
 }
 
 // What we know about the matched building, from our own tables only. Hidden until a building matches.
