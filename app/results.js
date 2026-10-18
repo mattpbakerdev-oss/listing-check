@@ -83,7 +83,6 @@ function BuildingCard({ building }) {
   if (!building) return null;
   const line = lineFor(building.nearest_station);
   const year = building.completed_year;
-  const age = year ? new Date().getFullYear() - year : null;
   return (
     <section className="building-card card" aria-label={`About ${building.building_name}`}>
       <h2>{building.building_name}</h2>
@@ -96,7 +95,7 @@ function BuildingCard({ building }) {
       </p>
       <p className="building-facts muted">
         {[
-          year ? `Completed ${year}${age !== null ? ` (${age} year${age === 1 ? "" : "s"} old)` : ""}` : null,
+          year ? `Built ${year}` : null,
           building.tier ? TIER_WORD[building.tier] ?? building.tier : null,
           `${building.listing_count ?? 0} listing${building.listing_count === 1 ? "" : "s"} in our data`,
         ].filter(Boolean).join(" · ")}
