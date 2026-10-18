@@ -345,7 +345,7 @@ export default function Checker({ reference }) {
 
       <div className="layout single">
         <RewritePanel key={session} draft={draft} setDraft={setDraft} onApplied={() => setApplied(true)} result={result} onNext={goTo("export")} canRewrite={Boolean((draft.title.trim() || draft.description.trim()) && result.matched.building_id)} />
-        <ExportPanel draft={draft} result={result} onExported={() => setExported(true)} onPreview={() => setPreview("preview-button")} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
+        <ExportPanel draft={draft} result={result} building={matchedBuilding} area={matchedArea} verdict={verdict} onExported={() => setExported(true)} onFix={goTo("results")} bench={bench.status === "ready" && bench.data.n >= MIN_COMPARABLES ? bench.data : null} />
       </div>
 
       <PreviewOverlay open={preview !== null} onClose={() => setPreview(null)} returnFocusTo={preview ?? undefined}

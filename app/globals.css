@@ -427,3 +427,15 @@ p.pv-gap, div.pv-gap { display: block; }
   .restore-bar { padding: 0.5rem 0.75rem; font-size: 0.875rem; gap: 0.5rem 0.75rem; }
   .restore-bar button { padding: 0.35rem 0.7rem; font-size: 0.875rem; }
 }
+
+/* the finished listing on the Export page, compact, in a portal's idiom */
+.listing-card { display: grid; gap: 0.5rem; padding: 1rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--canvas); }
+.listing-title { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.listing-title-th { font-weight: 500; }
+.listing-facts { font-size: 0.9375rem; }
+.listing-price { font-size: 1.125rem; font-weight: 700; }
+.listing-line { font-size: 0.875rem; color: var(--muted); }
+.listing-desc { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
+.export-done { font-size: 0.9375rem; }
+.export-done[data-tone="ok"] strong { color: var(--ok); }
+.export-done[data-tone="warn"] strong { color: var(--warn); }
