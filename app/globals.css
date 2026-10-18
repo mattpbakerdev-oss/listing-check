@@ -136,15 +136,16 @@ code { font-size: 0.9em; }
 .layout { display: grid; gap: 1rem; padding: 1rem 1rem 0; }
 .main-col { display: grid; gap: 1rem; min-width: 0; }
 @media (min-width: 1000px) {
-  .layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 0; padding: 0; }
-  .main-col { padding: 1.5rem; max-width: 800px; width: 100%; justify-self: center; }
+  .layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 0; padding: 0; max-width: 1360px; margin: 0 auto; }
+  .main-col { padding: 1.5rem; max-width: 880px; width: 100%; justify-self: center; }
   .results {
     position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; align-self: start;
     background: var(--sunk); border-left: 1px solid var(--rule); border-radius: 0; box-shadow: none; padding: 1.5rem;
   }
   .results .card { background: var(--sunk-card); padding: 20px; box-shadow: none; }
 }
-@media (min-width: 1280px) { .layout { grid-template-columns: minmax(0, 1fr) 400px; } }
+@media (min-width: 1280px) { .layout { grid-template-columns: minmax(0, 1fr) 480px; } }
+@media (min-width: 1362px) { .results { border-right: 1px solid var(--rule); } }
 
 /* form */
 .form { display: grid; gap: 1rem; }
@@ -220,11 +221,24 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 
 /* results: the tool's voice, tinted cards */
 .results { display: grid; gap: 1rem; }
-/* the ring block, the bars block and the fix list: 24px apart with a hairline between each */
-.score { display: grid; gap: 0; }
-.score > :not(:first-child) { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
-.score > .form-actions:not(:first-child) { margin-top: 1rem; padding-top: 0; border-top: 0; }
+/* the results: one card, its sections 24px apart with a hairline between each, no boxes inside */
+.results-card { display: grid; gap: 0; }
+.rs + .rs { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.rs { display: grid; gap: 0.75rem; }
+.rs-head { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .score-hero { display: flex; align-items: center; gap: 1rem; }
+.verdict-key { font-weight: 600; color: var(--ink); }
+.verdict-key[data-band="low"] { color: var(--alert); }
+.verdict-key[data-band="mid"] { color: var(--warn); }
+.verdict-key[data-band="high"] { color: var(--ok); }
+.fixes { list-style: none; margin: 0; padding: 0; }
+.fixes li { display: grid; gap: 0.125rem; padding: 0.625rem 0; border-top: 1px solid var(--rule); }
+.fixes li:first-child { border-top: 0; padding-top: 0; }
+.fix-row { display: flex; align-items: baseline; gap: 0.6rem; }
+.fixes a { font-weight: 500; text-decoration: none; color: var(--ink); }
+.fixes a:hover { text-decoration: underline; }
+.fixes .pts { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.fixes .msg { font-size: 0.875rem; color: var(--muted); }
 .ring { width: 112px; height: 112px; flex: none; } /* 1 viewBox unit = 1px, so the text sizes below are real pixels */
 .ring-track { stroke: var(--rule); }
 .ring-fill { stroke: var(--muted); transition: stroke-dashoffset 300ms ease-out, stroke 300ms; }
@@ -242,14 +256,15 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 .gain-chip { display: inline-block; margin-bottom: 0.5rem; padding: 0.15rem 0.5rem; border-radius: var(--radius); background: var(--ok-soft); color: var(--ok); font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; animation: gain-fade 3s ease-out forwards; }
 @media (prefers-reduced-motion: reduce) { .gain-chip { animation: none; } }
 /* what shaped it: a bar per card */
-.shaped { display: grid; gap: 0.5rem; }
-.shaped-head { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 .bars li { display: grid; grid-template-columns: 8.5rem 1fr auto; align-items: center; gap: 0.75rem; font-size: 0.9375rem; }
 .bars a { color: var(--ink); text-decoration: none; font-weight: 500; }
 .bars a:hover { text-decoration: underline; }
-.bar-track { display: block; height: 8px; border-radius: 8px; background: var(--rule); overflow: hidden; }
-.bar-fill { display: block; height: 100%; border-radius: 8px; background: var(--ok); }
+.bar-track { display: block; height: 8px; border-radius: 8px; background: var(--rule); }
+.bar-fill { display: block; height: 100%; border-radius: 8px; background: var(--ok); position: relative; }
+/* a marker at the end of the fill, as on a goal-progress bar */
+.bar-fill::after { content: ""; position: absolute; right: -1px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: inherit; box-shadow: 0 0 0 2px var(--sunk-card); }
+.bar-track { overflow: visible; }
 .bar-fill[data-band="mid"] { background: var(--warn); }
 .bar-fill[data-band="low"] { background: var(--alert); }
 .bar-num { font-variant-numeric: tabular-nums; font-size: 0.875rem; }
@@ -273,6 +288,7 @@ textarea[lang="th"], input[lang="th"], .rw-text[lang="th"] { font-family: var(--
 
 /* building card: what we hold about the matched building */
 .building-card { display: grid; gap: 0.25rem; }
+.building-card h2 { margin: 0; }
 .building-card h2 { margin: 0; font-size: 1rem; }
 .building-line { display: flex; align-items: center; flex-wrap: wrap; gap: 0 0.25rem; font-size: 0.9375rem; }
 .line-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 0.35rem; flex: none; }

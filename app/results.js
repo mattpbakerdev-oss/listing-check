@@ -15,19 +15,25 @@ const formatPts = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 export default function ResultsPanel({ result, problems, empty, gain, bench, draft, reference, building, byField, goTo }) {
   const bars = groupBars(result.fields);
   const needsRewrite = byField.title.earned < byField.title.points || byField.description.earned < byField.description.points;
+  const sentence = verdictSentence({ empty, score: result.score, toFix: problems.length });
+  const cut = sentence.indexOf(". ");
+  const key = cut > 0 ? sentence.slice(0, cut + 1) : sentence, rest = cut > 0 ? sentence.slice(cut + 1) : "";
   return (
     <aside className="results" id="results">
-      <section className="score card tinted">
-        <div className="score-hero">
-          <ScoreRing score={result.score} />
-          <div>
-            {gain ? <span className="gain-chip" key={gain.key} aria-live="polite">+{gain.amount}</span> : null}
-            <p className="score-word" data-band={empty ? "empty" : scoreBand(result.score)}>{verdictSentence({ empty, score: result.score, toFix: problems.length })}</p>
+      <div className="results-card card">
+        <section className="rs" aria-label="Score">
+          <div className="score-hero">
+            <ScoreRing score={result.score} />
+            <div>
+              {gain ? <span className="gain-chip" key={gain.key} aria-live="polite">+{gain.amount}</span> : null}
+              <p className="score-word"><strong className="verdict-key" data-band={empty ? "empty" : scoreBand(result.score)}>{key}</strong>{rest}</p>
+            </div>
           </div>
-        </div>
+        </section>
+
         {empty ? null : (
-          <div className="shaped">
-            <p className="shaped-head">What shaped it</p>
+          <section className="rs" aria-label="What shaped it">
+            <p className="rs-head">What shaped it</p>
             <ul className="bars">
               {bars.map((b) => (
                 <li key={b.id}>
@@ -37,29 +43,34 @@ export default function ResultsPanel({ result, problems, empty, gain, bench, dra
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
-        {empty ? null : problems.length === 0 ? (
-          <p className="allgood">Every field is complete. Check the price below, then publish.</p>
-        ) : (
-          <ul className="problems" aria-label="Fields to fix">
-            {problems.map((f) => (
-              <li key={f.field} data-status={f.status}>
-                <a href={`#${f.field}`} onClick={goTo(f.field)}>{f.label}</a>
-                <span className="pts">{formatPts(f.earned)}/{f.points}</span>
-                <span className="msg">{f.message}</span>
-              </li>
-            ))}
-          </ul>
+
+        {empty ? null : (
+          <section className="rs" aria-label="Fields to fix">
+            <p className="rs-head">{problems.length === 0 ? "Complete" : "To fix"}</p>
+            {problems.length === 0 ? (
+              <p className="allgood">Every field is complete. Check the price below, then publish.</p>
+            ) : (
+              <ul className="fixes">
+                {problems.map((f) => (
+                  <li key={f.field} data-status={f.status}>
+                    <span className="fix-row"><a href={`#${f.field}`} onClick={goTo(f.field)}>{f.label}</a><span className="pts">{formatPts(f.earned)}/{f.points}</span></span>
+                    <span className="msg">{f.message}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
-      </section>
 
-      <BuildingCard building={building} />
+        <BuildingCard building={building} />
 
-      <section className="bench card tinted">
-        <h2>Price check</h2>
-        <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
-      </section>
+        <section className="rs bench" aria-label="Price check">
+          <p className="rs-head">Price check</p>
+          <Benchmark bench={bench} draft={draft} result={result} reference={reference} />
+        </section>
+      </div>
 
       <p className="to-rewrite desktop-only"><a href="#rewrite" onClick={goTo("rewrite")}>Rewrite with AI</a>, below the form.</p>
       {empty ? null : (
@@ -79,7 +90,8 @@ function BuildingCard({ building }) {
   const line = lineFor(building.nearest_station);
   const year = building.completed_year;
   return (
-    <section className="building-card card" aria-label={`About ${building.building_name}`}>
+    <section className="rs building-card" aria-label={`About ${building.building_name}`}>
+      <p className="rs-head">Building</p>
       <h2>{building.building_name}</h2>
       <p className="building-line">
         {line?.colour ? <span className="line-dot" style={{ background: line.colour }} aria-hidden="true" /> : null}
